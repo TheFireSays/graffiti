@@ -93,6 +93,19 @@
 
 ---
 
+## Profile + Leaderboard Plan (Complete)
+
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-29-06-profile-leaderboard.md`
+
+- [x] Task 1: Profile Store (tag history + leaderboard queries)
+- [x] Task 2: Stat Cards Component
+- [x] Task 3: Tag History Component
+- [x] Task 4: Leaderboards Component (top taggers + top crews)
+- [x] Task 5: Profile Screen — Wire Everything Together
+- [x] Task 6: End-to-End Verification (lint clean)
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
