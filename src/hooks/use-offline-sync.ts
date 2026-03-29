@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import NetInfo from "@react-native-community/netinfo";
 import { useOfflineStore } from "../stores/offline-store";
 import { getQueue, updateStatus, removeFromQueue } from "../lib/offline-queue";
@@ -10,19 +10,7 @@ export function useOfflineSync() {
   const setLastSyncMessage = useOfflineStore((s) => s.setLastSyncMessage);
   const syncingRef = useRef(false);
 
-  useEffect(() => {
-    loadQueue();
-
-    const unsubscribe = NetInfo.addEventListener(async (state) => {
-      if (state.isConnected && !syncingRef.current) {
-        await syncPendingTags();
-      }
-    });
-
-    return () => unsubscribe();
-  }, [loadQueue]);
-
-  async function syncPendingTags() {
+  const syncPendingTags = useCallback(async () => {
     const queue = await getQueue();
     const pendingItems = queue.filter((q) => q.status === "queued");
     if (pendingItems.length === 0) return;
@@ -50,5 +38,17 @@ export function useOfflineSync() {
       setLastSyncMessage(`${synced} tag${synced > 1 ? "s" : ""} synced!`);
       setTimeout(() => setLastSyncMessage(null), 3000);
     }
-  }
+  }, [setSyncing, setLastSyncMessage, loadQueue]);
+
+  useEffect(() => {
+    loadQueue();
+
+    const unsubscribe = NetInfo.addEventListener(async (state) => {
+      if (state.isConnected && !syncingRef.current) {
+        await syncPendingTags();
+      }
+    });
+
+    return () => unsubscribe();
+  }, [loadQueue, syncPendingTags]);
 }

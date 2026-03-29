@@ -1,6 +1,11 @@
 import { placeTag } from "@/lib/tag-placement";
 import { supabase } from "@/lib/supabase";
 
+jest.mock("@/lib/offline-queue", () => ({
+  enqueue: jest.fn().mockResolvedValue({ id: "q_test", request: {}, timestamp: Date.now(), status: "queued" }),
+  getQueue: jest.fn().mockResolvedValue([]),
+}));
+
 jest.mock("@/lib/supabase", () => ({
   supabase: {
     rpc: jest.fn(),
@@ -87,7 +92,7 @@ describe("placeTag (place_tag_scored RPC)", () => {
     expect(result.sprayCost).toBe(3);
   });
 
-  it("returns error when RPC fails at network level", async () => {
+  it("returns error when RPC fails at network level (queued for offline)", async () => {
     mockRpc.mockResolvedValue({
       data: null,
       error: { message: "Network error" },
@@ -96,7 +101,9 @@ describe("placeTag (place_tag_scored RPC)", () => {
     const result = await placeTag(baseRequest);
 
     expect(result.success).toBe(false);
-    expect(result.error).toBe("Network error");
+    // Network errors now trigger offline queuing
+    expect(result.error).toBe("Tag queued for sync when online");
+    expect((result as any).queued).toBe(true);
   });
 
   it("returns error when RPC returns business logic failure", async () => {

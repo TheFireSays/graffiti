@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { enqueue } from "./offline-queue";
 
 interface PlacementRequest {
   tagImageId: string;
@@ -66,7 +67,6 @@ export async function placeTag(req: PlacementRequest): Promise<PlacementResult> 
   const result = await placeTagDirect(req);
 
   if (!result.success && isNetworkError(result.error)) {
-    const { enqueue } = await import("./offline-queue");
     await enqueue(req);
     return { success: false, error: "Tag queued for sync when online", queued: true };
   }
