@@ -1,5 +1,6 @@
 import React from "react";
-import { render } from "@testing-library/react-native";
+import { render, waitFor } from "@testing-library/react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuthStore } from "@/stores/auth-store";
 
 // Mock expo-router — use require inside factory to avoid out-of-scope variable error
@@ -47,6 +48,7 @@ import RootLayout from "@/app/_layout";
 describe("RootLayout (Auth Gate)", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (AsyncStorage.getItem as jest.Mock).mockResolvedValue("true");
   });
 
   it("shows loading indicator when isLoading is true", () => {
@@ -57,14 +59,16 @@ describe("RootLayout (Auth Gate)", () => {
     expect(queryByTestId("slot")).toBeNull();
   });
 
-  it("renders Slot when loading is complete", () => {
+  it("renders Slot when loading is complete", async () => {
     useAuthStore.setState({ isLoading: false, session: null });
     const { getByTestId } = render(<RootLayout />);
 
-    expect(getByTestId("slot")).toBeTruthy();
+    await waitFor(() => {
+      expect(getByTestId("slot")).toBeTruthy();
+    });
   });
 
-  it("renders without crashing when session exists", () => {
+  it("renders without crashing when session exists", async () => {
     useAuthStore.setState({
       isLoading: false,
       session: { user: { id: "u1" }, access_token: "token" } as any,
@@ -72,10 +76,12 @@ describe("RootLayout (Auth Gate)", () => {
     });
 
     const { getByTestId } = render(<RootLayout />);
-    expect(getByTestId("slot")).toBeTruthy();
+    await waitFor(() => {
+      expect(getByTestId("slot")).toBeTruthy();
+    });
   });
 
-  it("renders without crashing when onboarding is needed", () => {
+  it("renders without crashing when onboarding is needed", async () => {
     useAuthStore.setState({
       isLoading: false,
       session: { user: { id: "u1" }, access_token: "token" } as any,
@@ -83,6 +89,18 @@ describe("RootLayout (Auth Gate)", () => {
     });
 
     const { getByTestId } = render(<RootLayout />);
-    expect(getByTestId("slot")).toBeTruthy();
+    await waitFor(() => {
+      expect(getByTestId("slot")).toBeTruthy();
+    });
+  });
+
+  it("shows loading when AsyncStorage has not resolved yet", () => {
+    // Make AsyncStorage hang
+    (AsyncStorage.getItem as jest.Mock).mockReturnValue(new Promise(() => {}));
+    useAuthStore.setState({ isLoading: false, session: null });
+    const { queryByTestId } = render(<RootLayout />);
+
+    // Slot should NOT be present while waiting for AsyncStorage
+    expect(queryByTestId("slot")).toBeNull();
   });
 });

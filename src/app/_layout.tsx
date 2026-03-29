@@ -1,11 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Slot, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "../lib/supabase";
 import { useAuthStore } from "../stores/auth-store";
 import { useNotifications } from "../hooks/use-notifications";
 import { NotificationListener } from "../components/notifications/notification-listener";
+
+const ONBOARDING_KEY = "hasSeenOnboarding";
 
 export default function RootLayout() {
   const router = useRouter();
@@ -14,6 +17,13 @@ export default function RootLayout() {
   const isLoading = useAuthStore((s) => s.isLoading);
   const needsOnboarding = useAuthStore((s) => s.needsOnboarding);
   const setSession = useAuthStore((s) => s.setSession);
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    AsyncStorage.getItem(ONBOARDING_KEY).then((value) => {
+      setHasSeenOnboarding(value === "true");
+    });
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -32,14 +42,18 @@ export default function RootLayout() {
   useNotifications();
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || hasSeenOnboarding === null) return;
 
     const inAuthGroup = segments[0] === "(auth)";
     const inOnboardingGroup = segments[0] === "(onboarding)";
 
     if (!session) {
       if (!inAuthGroup) {
-        router.replace("/(auth)/sign-in");
+        if (!hasSeenOnboarding) {
+          router.replace("/(auth)/welcome");
+        } else {
+          router.replace("/(auth)/sign-in");
+        }
       }
     } else if (needsOnboarding) {
       if (!inOnboardingGroup) {
@@ -50,9 +64,9 @@ export default function RootLayout() {
         router.replace("/(tabs)");
       }
     }
-  }, [session, isLoading, needsOnboarding, segments, router]);
+  }, [session, isLoading, needsOnboarding, hasSeenOnboarding, segments, router]);
 
-  if (isLoading) {
+  if (isLoading || hasSeenOnboarding === null) {
     return (
       <View style={styles.loading}>
         <StatusBar style="light" />
