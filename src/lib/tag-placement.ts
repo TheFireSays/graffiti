@@ -12,6 +12,7 @@ interface PlacementRequest {
 interface PlacementResult {
   success: boolean;
   error?: string;
+  queued?: boolean;
   tagId?: string;
   xpEarned?: number;
   sprayCost?: number;
@@ -22,7 +23,13 @@ interface PlacementResult {
   leveledUp?: boolean;
 }
 
-export async function placeTag(req: PlacementRequest): Promise<PlacementResult> {
+function isNetworkError(error?: string): boolean {
+  if (!error) return false;
+  const networkPatterns = ["network", "fetch", "timeout", "econnrefused", "err_network"];
+  return networkPatterns.some((p) => error.toLowerCase().includes(p));
+}
+
+export async function placeTagDirect(req: PlacementRequest): Promise<PlacementResult> {
   const { data, error } = await supabase.rpc("place_tag_scored", {
     p_tag_image_id: req.tagImageId,
     p_custom_colors: req.customColors,
@@ -53,4 +60,16 @@ export async function placeTag(req: PlacementRequest): Promise<PlacementResult> 
     newSprayCans: result.new_spray_cans,
     leveledUp: result.leveled_up,
   };
+}
+
+export async function placeTag(req: PlacementRequest): Promise<PlacementResult> {
+  const result = await placeTagDirect(req);
+
+  if (!result.success && isNetworkError(result.error)) {
+    const { enqueue } = await import("./offline-queue");
+    await enqueue(req);
+    return { success: false, error: "Tag queued for sync when online", queued: true };
+  }
+
+  return result;
 }
