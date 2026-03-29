@@ -68,7 +68,7 @@ export default function ProfileScreen() {
       <View style={styles.settingsRow}>
         <Pressable
           style={styles.settingsButton}
-          onPress={() => router.push("/(tabs)/settings")}
+          onPress={() => router.push("/settings")}
         >
           <Text style={styles.settingsText}>Settings</Text>
         </Pressable>
