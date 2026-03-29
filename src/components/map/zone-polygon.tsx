@@ -3,11 +3,12 @@ import type { MapZone } from "../../lib/geo";
 
 interface ZonePolygonProps {
   zone: MapZone;
+  onPress?: (zone: MapZone) => void;
 }
 
 const UNCONTROLLED_COLOR = "#444444";
 
-export function ZonePolygon({ zone }: ZonePolygonProps) {
+export function ZonePolygon({ zone, onPress }: ZonePolygonProps) {
   const fillColor = zone.controllingCrewColor ?? UNCONTROLLED_COLOR;
 
   return (
@@ -16,7 +17,8 @@ export function ZonePolygon({ zone }: ZonePolygonProps) {
       fillColor={hexToRgba(fillColor, 0.2)}
       strokeColor={hexToRgba(fillColor, 0.6)}
       strokeWidth={2}
-      tappable={false}
+      tappable={!!onPress}
+      onPress={() => onPress?.(zone)}
     />
   );
 }

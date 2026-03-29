@@ -15,10 +15,12 @@ interface MapState {
   tags: MapTag[];
   crews: MapCrew[];
   selectedTag: MapTag | null;
+  selectedZone: MapZone | null;
   isLoading: boolean;
   realtimeChannel: RealtimeChannel | null;
   loadMapData: () => Promise<void>;
   selectTag: (tag: MapTag | null) => void;
+  selectZone: (zone: MapZone | null) => void;
   subscribeToChanges: () => void;
   unsubscribe: () => void;
 }
@@ -28,6 +30,7 @@ export const useMapStore = create<MapState>((set, get) => ({
   tags: [],
   crews: [],
   selectedTag: null,
+  selectedZone: null,
   isLoading: true,
   realtimeChannel: null,
 
@@ -42,7 +45,11 @@ export const useMapStore = create<MapState>((set, get) => ({
   },
 
   selectTag: (tag) => {
-    set({ selectedTag: tag });
+    set({ selectedTag: tag, selectedZone: null });
+  },
+
+  selectZone: (zone) => {
+    set({ selectedZone: zone, selectedTag: null });
   },
 
   subscribeToChanges: () => {
