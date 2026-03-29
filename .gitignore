@@ -49,6 +49,7 @@ supabase/.branches/
 # Environment
 .env
 .env.production
+.env.production.local
 
 # Superpowers
 .superpowers/
