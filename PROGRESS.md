@@ -276,6 +276,43 @@
 
 ---
 
+## UI Polish Branch (dev/ui-polish) — Complete
+
+### Phase 1: Onboarding Polish
+- [x] Install AsyncStorage
+- [x] Welcome carousel component (3 slides, Reanimated transitions, skip/next/Get Started)
+- [x] Welcome screen route with AsyncStorage persistence
+- [x] Root layout routing to welcome on first launch
+- [x] 6 component tests for carousel + updated auth-gate tests
+- [x] Verification: 110 tests, 0 type errors, 0 lint errors
+
+### Phase 2: Map UX Improvements
+- [x] Grid-based tag clustering algorithm (src/lib/clustering.ts)
+- [x] ClusterMarker component with count badge and tap-to-zoom
+- [x] Zone info bottom sheet (zone name, controlling crew, tag breakdown)
+- [x] Tappable zone polygons with zone selection in map store
+- [x] Map controls: center on me + zoom in/out buttons
+- [x] 11 new tests (clustering logic + zone info sheet)
+- [x] Verification: 125 tests, 0 type errors, 0 lint errors
+
+### Phase 3: Deep Linking
+- [x] Deep link parser for graffiti:// and https://graffiti.app URLs
+- [x] Dynamic routes: /tag/[id] and /crew/[id]
+- [x] Universal link config: intentFilters (Android) + associatedDomains (iOS)
+- [x] Tag deep link loads map and selects tag
+- [x] 10 tests for deep link URL parsing
+- [x] Verification: 135 tests, 0 type errors, 0 lint errors
+
+### Phase 4: Error Reporting + Crash Handling
+- [x] @sentry/react-native installed and configured (silent without DSN)
+- [x] ErrorBoundary component with retry button
+- [x] reportError/reportMessage helpers (console in dev, Sentry in prod)
+- [x] Root layout wrapped in ErrorBoundary
+- [x] 8 new tests (error boundary + error reporting)
+- [x] Verification: 142 passing (1 pre-existing failure in offline-queue dynamic import), 0 type errors, 0 lint errors
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
