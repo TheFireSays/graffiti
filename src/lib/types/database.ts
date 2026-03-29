@@ -626,6 +626,7 @@ export type Database = {
         Returns: Json
       }
       decay_expired_tags: { Args: never; Returns: Json }
+      delete_account: { Args: never; Returns: Json }
       find_zone_for_point: {
         Args: { p_lat: number; p_lng: number }
         Returns: string

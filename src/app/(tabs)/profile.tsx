@@ -1,6 +1,9 @@
-import { useEffect } from "react";
-import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
+import { useEffect, useState } from "react";
+import { View, Text, TextInput, ScrollView, Pressable, StyleSheet, Alert } from "react-native";
+import { useRouter } from "expo-router";
+import { supabase } from "../../lib/supabase";
 import { useAuthStore } from "../../stores/auth-store";
+import { containsProfanity } from "../../lib/profanity";
 import { useProfileStore } from "../../stores/profile-store";
 import { StatCards } from "../../components/profile/stat-cards";
 import { TagHistory } from "../../components/profile/tag-history";
@@ -8,8 +11,11 @@ import { Leaderboards } from "../../components/profile/leaderboards";
 import { AvatarPicker } from "../../components/profile/avatar-picker";
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const profile = useAuthStore((s) => s.profile);
-  const signOut = useAuthStore((s) => s.signOut);
+  const fetchProfile = useAuthStore((s) => s.fetchProfile);
+  const [editing, setEditing] = useState(false);
+  const [displayName, setDisplayName] = useState("");
 
   const tagHistory = useProfileStore((s) => s.tagHistory);
   const tagCount = useProfileStore((s) => s.tagCount);
@@ -27,6 +33,27 @@ export default function ProfileScreen() {
     }
   }, [profile, loadTagHistory, loadLeaderboards]);
 
+  async function handleSaveDisplayName() {
+    const trimmed = displayName.trim();
+    if (!trimmed) {
+      Alert.alert("Error", "Display name cannot be empty.");
+      return;
+    }
+    if (containsProfanity(trimmed)) {
+      Alert.alert("Error", "That name is not allowed.");
+      return;
+    }
+    const { error } = await supabase.rpc("update_profile", {
+      p_display_name: trimmed,
+    });
+    if (error) {
+      Alert.alert("Error", error.message);
+      return;
+    }
+    await fetchProfile();
+    setEditing(false);
+  }
+
   if (!profile) {
     return (
       <View style={styles.loading}>
@@ -37,14 +64,48 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+      {/* Settings gear */}
+      <View style={styles.settingsRow}>
+        <Pressable
+          style={styles.settingsButton}
+          onPress={() => router.push("/(tabs)/settings")}
+        >
+          <Text style={styles.settingsText}>Settings</Text>
+        </Pressable>
+      </View>
+
       {/* Header */}
       <View style={styles.header}>
         <AvatarPicker />
         <Text style={styles.username}>{profile.username}</Text>
-        {profile.crew_id && (
-          <Text style={styles.crewLabel}>
-            {profile.display_name}
-          </Text>
+        {editing ? (
+          <View style={styles.editRow}>
+            <TextInput
+              style={styles.editInput}
+              value={displayName}
+              onChangeText={setDisplayName}
+              placeholder="Display name"
+              placeholderTextColor="#666"
+              maxLength={30}
+            />
+            <Pressable onPress={handleSaveDisplayName}>
+              <Text style={styles.saveText}>Save</Text>
+            </Pressable>
+            <Pressable onPress={() => setEditing(false)}>
+              <Text style={styles.cancelText}>Cancel</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <Pressable
+            onPress={() => {
+              setDisplayName(profile.display_name ?? "");
+              setEditing(true);
+            }}
+          >
+            <Text style={styles.crewLabel}>
+              {profile.display_name ?? "Tap to set display name"}
+            </Text>
+          </Pressable>
         )}
       </View>
 
@@ -71,12 +132,6 @@ export default function ProfileScreen() {
         />
       </View>
 
-      {/* Sign Out */}
-      <View style={styles.section}>
-        <Pressable style={styles.signOutButton} onPress={signOut}>
-          <Text style={styles.signOutText}>Sign Out</Text>
-        </Pressable>
-      </View>
     </ScrollView>
   );
 }
@@ -86,18 +141,24 @@ const styles = StyleSheet.create({
   content: { paddingTop: 60, paddingBottom: 120, gap: 24 },
   loading: { flex: 1, backgroundColor: "#1a1a2e", alignItems: "center", justifyContent: "center" },
   loadingText: { color: "#666", fontSize: 14 },
+  settingsRow: { alignItems: "flex-end", paddingHorizontal: 16 },
+  settingsButton: { padding: 8 },
+  settingsText: { color: "#4ecdc4", fontSize: 14, fontWeight: "600" },
   header: { alignItems: "center", gap: 8 },
-  avatar: {
-    width: 72, height: 72, borderRadius: 36,
-    backgroundColor: "#4ecdc4", alignItems: "center", justifyContent: "center",
-  },
-  avatarText: { color: "#1a1a2e", fontSize: 28, fontWeight: "bold" },
   username: { color: "#fff", fontSize: 22, fontWeight: "bold" },
   crewLabel: { color: "#999", fontSize: 14 },
-  section: { marginTop: 8 },
-  signOutButton: {
-    marginHorizontal: 16, backgroundColor: "#2a2a4a", borderRadius: 12,
-    paddingVertical: 14, alignItems: "center",
+  editRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 16 },
+  editInput: {
+    flex: 1,
+    backgroundColor: "#2a2a4a",
+    color: "#fff",
+    borderRadius: 8,
+    padding: 8,
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: "#3a3a5a",
   },
-  signOutText: { color: "#ff4444", fontSize: 14, fontWeight: "600" },
+  saveText: { color: "#4ecdc4", fontSize: 14, fontWeight: "600" },
+  cancelText: { color: "#999", fontSize: 14 },
+  section: { marginTop: 8 },
 });
