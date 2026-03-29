@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "graffiti",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.graffiti.app",
@@ -43,7 +42,9 @@
           "locationWhenInUsePermission": "Graffiti uses your location to place and discover tags near you.",
           "locationAlwaysAndWhenInUsePermission": "Graffiti uses your location to place and discover tags near you."
         }
-      ]
+      ],
+      "expo-sqlite",
+      "expo-secure-store"
     ]
   }
 }
