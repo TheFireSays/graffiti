@@ -80,6 +80,19 @@
 
 ---
 
+## Crew System Plan (Complete)
+
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-29-06-crew-system.md`
+
+- [x] Task 1: Crew Store (Zustand)
+- [x] Task 2: NoCrewView + CreateCrewForm Components
+- [x] Task 3: CrewRoster + CrewInvites + CrewDashboard Components
+- [x] Task 4: Wire Up Crew Screen
+- [x] Task 5: Invite RLS Fix (migration 00016)
+- [x] Task 6: E2E Verification
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
