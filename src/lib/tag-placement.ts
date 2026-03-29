@@ -31,7 +31,7 @@ export async function placeTag(req: PlacementRequest): Promise<PlacementResult> 
     p_lng: req.longitude,
     p_lat: req.latitude,
     p_compass_heading: req.compassHeading,
-    p_go_over_tag_id: req.goOverTagId ?? null,
+    p_go_over_tag_id: req.goOverTagId ?? undefined,
   });
 
   if (error) {
