@@ -409,6 +409,81 @@ export type Database = {
         }
         Relationships: []
       }
+      season_leaderboard: {
+        Row: {
+          crew_id: string
+          rank: number | null
+          season_id: string
+          tags_gone_over: number
+          tags_placed: number
+          total_xp: number
+          zones_held: number
+        }
+        Insert: {
+          crew_id: string
+          rank?: number | null
+          season_id: string
+          tags_gone_over?: number
+          tags_placed?: number
+          total_xp?: number
+          zones_held?: number
+        }
+        Update: {
+          crew_id?: string
+          rank?: number | null
+          season_id?: string
+          tags_gone_over?: number
+          tags_placed?: number
+          total_xp?: number
+          zones_held?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "season_leaderboard_crew_id_fkey"
+            columns: ["crew_id"]
+            isOneToOne: false
+            referencedRelation: "crews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "season_leaderboard_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seasons: {
+        Row: {
+          config: Json
+          created_at: string
+          ends_at: string
+          id: string
+          name: string
+          starts_at: string
+          status: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          ends_at: string
+          id?: string
+          name: string
+          starts_at: string
+          status?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          ends_at?: string
+          id?: string
+          name?: string
+          starts_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
       suspicious_activity: {
         Row: {
           created_at: string
@@ -673,7 +748,22 @@ export type Database = {
         Args: { p_metadata?: Json; p_reason: string; p_user_id: string }
         Returns: undefined
       }
+      get_active_season: { Args: never; Returns: Json }
       get_constant: { Args: { p_key: string }; Returns: number }
+      get_season_leaderboard: {
+        Args: { p_season_id: string }
+        Returns: {
+          crew_abbreviation: string
+          crew_color: string
+          crew_id: string
+          crew_name: string
+          rank: number
+          tags_gone_over: number
+          tags_placed: number
+          total_xp: number
+          zones_held: number
+        }[]
+      }
       get_tags_for_map: {
         Args: never
         Returns: {
@@ -755,6 +845,16 @@ export type Database = {
           p_username?: string
         }
         Returns: Json
+      }
+      update_season_stats: {
+        Args: {
+          p_crew_id: string
+          p_go_over_delta?: number
+          p_tags_delta?: number
+          p_xp_delta?: number
+          p_zones_delta?: number
+        }
+        Returns: undefined
       }
     }
     Enums: {
