@@ -1,5 +1,7 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { useState } from "react";
+import { View, Text, Pressable, StyleSheet, Alert } from "react-native";
 import type { MapTag } from "../../lib/geo";
+import { supabase } from "../../lib/supabase";
 
 interface TagDetailSheetProps {
   tag: MapTag;
@@ -8,6 +10,30 @@ interface TagDetailSheetProps {
 
 export function TagDetailSheet({ tag, onClose }: TagDetailSheetProps) {
   const timeAgo = getTimeAgo(tag.createdAt);
+  const [reporting, setReporting] = useState(false);
+
+  async function handleReport() {
+    setReporting(true);
+    const { data, error } = await supabase.rpc("report_tag", {
+      p_tag_id: tag.id,
+      p_reason: "offensive" as string,
+    });
+
+    setReporting(false);
+
+    if (error) {
+      Alert.alert("Error", error.message);
+      return;
+    }
+
+    const result = data as { success: boolean; error?: string };
+    if (result.success) {
+      Alert.alert("Reported", "This tag has been flagged for review.");
+      onClose();
+    } else {
+      Alert.alert("Error", result.error ?? "Could not report tag");
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -29,6 +55,15 @@ export function TagDetailSheet({ tag, onClose }: TagDetailSheetProps) {
         <DetailRow label="When" value={timeAgo} />
         <DetailRow label="Heading" value={`${Math.round(tag.compassHeading)}\u00B0`} />
       </View>
+      <Pressable
+        style={styles.reportButton}
+        onPress={handleReport}
+        disabled={reporting}
+      >
+        <Text style={styles.reportText}>
+          {reporting ? "Reporting..." : "Report Tag"}
+        </Text>
+      </Pressable>
     </View>
   );
 }
@@ -76,4 +111,12 @@ const styles = StyleSheet.create({
   detailRow: { flexDirection: "row", justifyContent: "space-between" },
   detailLabel: { color: "#666", fontSize: 14 },
   detailValue: { color: "#fff", fontSize: 14 },
+  reportButton: {
+    marginTop: 16,
+    backgroundColor: "#2a2a4a",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  reportText: { color: "#ff6b6b", fontSize: 14, fontWeight: "600" },
 });

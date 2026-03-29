@@ -696,6 +696,14 @@ export type Database = {
         Args: { p_platform: string; p_token: string }
         Returns: Json
       }
+      report_tag: {
+        Args: { p_details?: string; p_reason: string; p_tag_id: string }
+        Returns: Json
+      }
+      review_report: {
+        Args: { p_action: string; p_report_id: string }
+        Returns: Json
+      }
       unregister_push_token: { Args: { p_token: string }; Returns: Json }
       update_profile: {
         Args: {

@@ -4,6 +4,7 @@ import {
 } from "react-native";
 import { useCrewStore } from "../../stores/crew-store";
 import { useAuthStore } from "../../stores/auth-store";
+import { containsProfanity } from "../../lib/profanity";
 
 interface CreateCrewFormProps {
   onBack: () => void;
@@ -28,6 +29,10 @@ export function CreateCrewForm({ onBack, onCreated }: CreateCrewFormProps) {
   async function handleCreate() {
     if (!name.trim()) { setError("Crew name is required."); return; }
     if (abbreviation.trim().length !== 3) { setError("Abbreviation must be exactly 3 characters."); return; }
+    if (containsProfanity(name.trim()) || containsProfanity(abbreviation.trim())) {
+      setError("That name is not allowed.");
+      return;
+    }
     if (!profile) return;
 
     setLoading(true);

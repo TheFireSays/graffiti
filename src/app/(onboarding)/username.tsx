@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { supabase } from "../../lib/supabase";
 import { useAuthStore } from "../../stores/auth-store";
+import { containsProfanity } from "../../lib/profanity";
 
 export default function UsernameScreen() {
   const user = useAuthStore((s) => s.user);
@@ -36,6 +37,11 @@ export default function UsernameScreen() {
 
     if (!/^[a-zA-Z0-9_]+$/.test(trimmed)) {
       setError("Username can only contain letters, numbers, and underscores.");
+      return;
+    }
+
+    if (containsProfanity(trimmed)) {
+      setError("That username is not allowed.");
       return;
     }
 
