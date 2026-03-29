@@ -40,5 +40,6 @@ export function useRealtime({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [table, event, schema, enabled]); // intentionally exclude onEvent to avoid resubscribing on every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally exclude onEvent to avoid resubscribing on every render
+  }, [table, event, schema, enabled]);
 }

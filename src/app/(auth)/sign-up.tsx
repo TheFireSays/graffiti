@@ -30,6 +30,7 @@ export default function SignUpScreen() {
       return;
     }
 
+    // eslint-disable-next-line security/detect-possible-timing-attacks -- user-facing validation, not a security comparison
     if (password !== confirmPassword) {
       setError("Passwords don't match.");
       return;
