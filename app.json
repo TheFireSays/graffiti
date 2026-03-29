@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "Graffiti",
+    "slug": "graffiti",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "graffiti",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.graffiti.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Graffiti uses your camera to place AR tags on buildings and structures.",
+        "NSLocationWhenInUseUsageDescription": "Graffiti uses your location to place and discover tags near you.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Graffiti uses your location to place and discover tags near you."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#1a1a2e"
+      },
+      "package": "com.graffiti.app",
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Graffiti uses your camera to place AR tags on buildings and structures."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Graffiti uses your location to place and discover tags near you.",
+          "locationAlwaysAndWhenInUsePermission": "Graffiti uses your location to place and discover tags near you."
+        }
+      ]
+    ]
+  }
+}
