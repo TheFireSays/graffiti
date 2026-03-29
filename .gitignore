@@ -47,7 +47,7 @@ supabase/.temp/
 supabase/.branches/
 
 # Environment
-.env.local
+.env
 .env.production
 
 # Superpowers
