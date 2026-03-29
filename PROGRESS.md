@@ -1,12 +1,13 @@
-# Scaffolding Plan — Progress Tracker
+# Graffiti App — Progress Tracker
 
-**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-29-01-project-scaffolding.md`
 **Branch:** `dev/scaffolding`
 **Started:** 2026-03-29
 
 ---
 
-## Task Status
+## Scaffolding Plan (Complete)
+
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-29-01-project-scaffolding.md`
 
 - [x] Task 1: Create Expo Project
 - [x] Task 2: Install Core Dependencies
@@ -30,6 +31,25 @@
 
 ---
 
+## Auth Flow Plan (Complete)
+
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-29-02-auth-flow.md`
+
+- [x] Task 1: Update Auth Store with Onboarding State
+- [x] Task 2: Auth Layout and Sign-In Screen
+- [x] Task 3: Sign-Up Screen
+- [x] Task 4: Onboarding — Username Selection
+- [x] Task 5: Root Layout — Auth Gate with Route Protection
+- [x] Task 6: Profile Sign-Out Button
+- [x] Task 7: Supabase Local Auth Config
+- [x] Task 8: Clean Up Template Components
+- [x] Task 9: E2E Auth Flow Verification
+
+---
+
 ## Notes / Errors
 
-- Task 3 (2026-03-29): Supabase CLI 2.84.4 used. New CLI version outputs `PUBLISHABLE_KEY` (sb_publishable_...) format in UI but `ANON_KEY` JWT is still present in JSON output and used for `.env.local`. Two services stopped but non-critical: `supabase_imgproxy_graffiti` (image optimization) and `supabase_pooler_graffiti` (connection pooler) — core API, Auth, DB, Realtime, Storage all running.
+- Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
+- Task 14/Scaffolding: Fixed UUID format — replaced invalid hex prefixes (t→b, z→d) in seed UUIDs.
+- Task 15/Scaffolding: Fixed stderr leak ("Connecting to db 5432") in generated database.ts.
+- Task 9/Auth: Fixed lint error — unescaped apostrophe in sign-in.tsx.
