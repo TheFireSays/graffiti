@@ -262,6 +262,20 @@
 
 ---
 
+## Phase 9: Seasonal Competitions (Complete)
+
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-29-16-seasonal-competitions.md`
+
+- [x] Task 1: Seasons schema + RPCs (migration 00037) — seasons table, season_leaderboard table, get_active_season + get_season_leaderboard RPCs
+- [x] Task 2: Season-aware scoring (migration 00038) — update_season_stats helper, tag insert/archive/zone flip triggers
+- [x] Task 3: Season support in profile store — activeSeason, seasonLeaderboard, loadActiveSeason, loadSeasonLeaderboard
+- [x] Task 4: Season banner component — shows active season name + days remaining on map
+- [x] Task 5: Wire season banner into map screen
+- [x] Task 6: Season leaderboard tab in profile screen — third tab showing crew rankings per season
+- [x] Task 7: Integration tests + verification — 114 tests, 0 type errors, 0 lint errors
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
