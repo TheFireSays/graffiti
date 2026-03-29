@@ -228,6 +228,18 @@
 
 ---
 
+## Phase 6: Deploy to Supabase Cloud (Blocked)
+
+**Status:** Blocked — requires interactive `supabase login` with access token from https://supabase.com/dashboard/account/tokens. Run `npx supabase login` manually, then `npx supabase link` and `npx supabase db push`.
+
+---
+
+## Phase 7: Build Dev Client (Blocked)
+
+**Status:** Blocked — requires interactive `eas login` with Expo account. Run `npm install -g eas-cli && eas login` manually, then `eas build:configure && eas build --platform android --profile development`.
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
