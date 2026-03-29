@@ -184,6 +184,19 @@
 
 ---
 
+## Phase 3: Tag Image Storage (Complete)
+
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-29-12-tag-image-storage.md`
+
+- [x] Task 1: Storage buckets migration (00031) — tag-images + avatars with RLS policies
+- [x] Task 2: Update tag image URLs migration (00032) — placeholder marker
+- [x] Task 3: Tag library image rendering — Image component with color-box fallback
+- [x] Task 4: AvatarPicker component — image picker + Storage upload + profile update (2 tests)
+- [x] Task 5: Wire avatar into profile screen
+- [x] Task 6: Full verification — 89 tests, 0 type errors, 0 lint errors
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
