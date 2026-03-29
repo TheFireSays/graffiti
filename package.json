@@ -17,6 +17,7 @@
     "@react-navigation/elements": "^2.9.10",
     "@react-navigation/native": "^7.1.33",
     "@supabase/supabase-js": "^2.100.1",
+    "bad-words": "^4.0.0",
     "expo": "~55.0.9",
     "expo-camera": "~55.0.11",
     "expo-constants": "~55.0.9",
@@ -51,6 +52,7 @@
   },
   "devDependencies": {
     "@testing-library/react-native": "^13.3.3",
+    "@types/bad-words": "^3.0.3",
     "@types/jest": "^30.0.0",
     "@types/react": "~19.2.2",
     "eslint": "^9.0.0",
