@@ -31,6 +31,26 @@ interface LeaderboardCrew {
   memberCount: number;
 }
 
+interface SeasonInfo {
+  id: string;
+  name: string;
+  startsAt: string;
+  endsAt: string;
+  status: string;
+}
+
+interface SeasonLeaderboardEntry {
+  crewId: string;
+  crewName: string;
+  crewAbbreviation: string;
+  crewColor: string;
+  zonesHeld: number;
+  tagsPlaced: number;
+  tagsGoneOver: number;
+  totalXp: number;
+  rank: number;
+}
+
 interface ProfileStoreState {
   tagHistory: TagHistoryItem[];
   tagCount: number;
@@ -38,12 +58,17 @@ interface ProfileStoreState {
   topCrews: LeaderboardCrew[];
   isLoadingHistory: boolean;
   isLoadingLeaderboards: boolean;
+  activeSeason: SeasonInfo | null;
+  seasonLeaderboard: SeasonLeaderboardEntry[];
+  isLoadingSeason: boolean;
 
   loadTagHistory: (userId: string) => Promise<void>;
   loadLeaderboards: () => Promise<void>;
+  loadActiveSeason: () => Promise<void>;
+  loadSeasonLeaderboard: (seasonId: string) => Promise<void>;
 }
 
-export type { TagHistoryItem, LeaderboardUser, LeaderboardCrew };
+export type { TagHistoryItem, LeaderboardUser, LeaderboardCrew, SeasonInfo, SeasonLeaderboardEntry };
 
 export const useProfileStore = create<ProfileStoreState>((set) => ({
   tagHistory: [],
@@ -52,6 +77,9 @@ export const useProfileStore = create<ProfileStoreState>((set) => ({
   topCrews: [],
   isLoadingHistory: false,
   isLoadingLeaderboards: false,
+  activeSeason: null,
+  seasonLeaderboard: [],
+  isLoadingSeason: false,
 
   loadTagHistory: async (userId) => {
     set({ isLoadingHistory: true });
@@ -137,5 +165,50 @@ export const useProfileStore = create<ProfileStoreState>((set) => ({
       : [];
 
     set({ topUsers, topCrews, isLoadingLeaderboards: false });
+  },
+
+  loadActiveSeason: async () => {
+    set({ isLoadingSeason: true });
+    const { data, error } = await supabase.rpc("get_active_season");
+    if (!error && data && data !== null) {
+      const season = data as any;
+      if (season && season.id) {
+        set({
+          activeSeason: {
+            id: season.id,
+            name: season.name,
+            startsAt: season.starts_at,
+            endsAt: season.ends_at,
+            status: season.status,
+          },
+          isLoadingSeason: false,
+        });
+      } else {
+        set({ activeSeason: null, isLoadingSeason: false });
+      }
+    } else {
+      set({ activeSeason: null, isLoadingSeason: false });
+    }
+  },
+
+  loadSeasonLeaderboard: async (seasonId) => {
+    const { data, error } = await supabase.rpc("get_season_leaderboard", {
+      p_season_id: seasonId,
+    });
+    if (!error && data) {
+      set({
+        seasonLeaderboard: (data as any[]).map((row) => ({
+          crewId: row.crew_id,
+          crewName: row.crew_name,
+          crewAbbreviation: row.crew_abbreviation,
+          crewColor: row.crew_color,
+          zonesHeld: row.zones_held,
+          tagsPlaced: row.tags_placed,
+          tagsGoneOver: row.tags_gone_over,
+          totalXp: row.total_xp,
+          rank: Number(row.rank),
+        })),
+      });
+    }
   },
 }));
