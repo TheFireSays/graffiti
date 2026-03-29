@@ -7,6 +7,12 @@ import { supabase } from "../lib/supabase";
 import { useAuthStore } from "../stores/auth-store";
 import { useNotifications } from "../hooks/use-notifications";
 import { NotificationListener } from "../components/notifications/notification-listener";
+import { ErrorBoundary } from "../components/error-boundary";
+import { SyncToast } from "../components/offline/sync-toast";
+import { useOfflineSync } from "../hooks/use-offline-sync";
+import { initErrorReporting } from "../lib/error-reporting";
+
+initErrorReporting();
 
 const ONBOARDING_KEY = "hasSeenOnboarding";
 
@@ -40,6 +46,7 @@ export default function RootLayout() {
   }, [setSession]);
 
   useNotifications();
+  useOfflineSync();
 
   useEffect(() => {
     if (isLoading || hasSeenOnboarding === null) return;
@@ -76,11 +83,12 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <ErrorBoundary>
       <StatusBar style="light" />
       <NotificationListener />
       <Slot />
-    </>
+      <SyncToast />
+    </ErrorBoundary>
   );
 }
 

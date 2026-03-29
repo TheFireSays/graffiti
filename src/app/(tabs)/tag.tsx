@@ -9,6 +9,7 @@ import { CameraViewWithHUD } from "../../components/camera/camera-view";
 import { TagLibrarySheet } from "../../components/camera/tag-library-sheet";
 import { ColorPicker } from "../../components/camera/color-picker";
 import { PlacementConfirmation } from "../../components/camera/placement-confirmation";
+import { PendingBadge } from "../../components/offline/pending-badge";
 
 export default function TagScreen() {
   const { location, error: locationError, isLoading: locationLoading } = useLocation();
@@ -56,6 +57,8 @@ export default function TagScreen() {
       setPlacementSuccess(true);
       loadMapData();
       fetchProfile();
+    } else if ((result as any).queued) {
+      setPlacementError("Tag queued — will sync when online");
     } else {
       setPlacementError(result.error ?? "Failed to place tag");
     }
@@ -98,6 +101,10 @@ export default function TagScreen() {
         isPlacing={isPlacing}
       />
 
+      <View style={styles.pendingRow}>
+        <PendingBadge />
+      </View>
+
       {selectedImage && !showLibrary && !placementSuccess && <ColorPicker />}
 
       {placementError && (
@@ -124,4 +131,5 @@ const styles = StyleSheet.create({
   errorText: { color: "#ff4444", fontSize: 16 },
   errorBanner: { position: "absolute", top: 100, left: 16, right: 16, backgroundColor: "rgba(255, 68, 68, 0.9)", borderRadius: 12, padding: 12 },
   errorBannerText: { color: "#fff", fontSize: 14, textAlign: "center" },
+  pendingRow: { position: "absolute", top: 60, right: 16, zIndex: 10 },
 });
