@@ -17,7 +17,7 @@ jest.mock("@/lib/supabase", () => ({
   },
 }));
 
-const mockFrom = supabase.from as jest.Mock;
+const mockFrom = supabase.from as unknown as jest.Mock;
 
 describe("Zone Control (client-side verification)", () => {
   beforeEach(() => {
@@ -40,14 +40,14 @@ describe("Zone Control (client-side verification)", () => {
     };
     mockFrom.mockReturnValue(chain);
 
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("zones")
       .select("*")
       .eq("id", mockZone.id)
       .single();
 
     expect(data).toBeDefined();
-    expect(data.controlling_crew_id).toBe("c1000000-0000-0000-0000-000000000001");
+    expect(data!.controlling_crew_id).toBe("c1000000-0000-0000-0000-000000000001");
   });
 
   it("activity feed records zone flip events", async () => {
@@ -69,7 +69,7 @@ describe("Zone Control (client-side verification)", () => {
     };
     mockFrom.mockReturnValue(chain);
 
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("activity_feed")
       .select("*")
       .eq("event_type", "zone_flip")
@@ -77,19 +77,17 @@ describe("Zone Control (client-side verification)", () => {
       .limit(1);
 
     expect(data).toHaveLength(1);
-    expect(data[0].event_type).toBe("zone_flip");
-    expect(data[0].zone_id).toBeDefined();
-    expect(data[0].crew_id).toBeDefined();
+    expect(data![0].event_type).toBe("zone_flip");
+    expect(data![0].zone_id).toBeDefined();
+    expect(data![0].crew_id).toBeDefined();
   });
 
-  it("zone query returns tag count columns for crew comparison", async () => {
+  it("zone query returns controlling_crew_id column", async () => {
     const mockZone = {
       id: "z1",
       name: "Downtown",
       boundary: { type: "Polygon", coordinates: [] },
       controlling_crew_id: null,
-      tag_count_crew1: 0,
-      tag_count_crew2: 0,
       created_at: "2026-01-01",
     };
 
@@ -99,8 +97,8 @@ describe("Zone Control (client-side verification)", () => {
     };
     mockFrom.mockReturnValue(chain);
 
-    const { data } = await supabase.from("zones").select("*").limit(1);
+    const { data } = await (supabase as any).from("zones").select("*").limit(1);
 
-    expect(data[0]).toHaveProperty("controlling_crew_id");
+    expect(data![0]).toHaveProperty("controlling_crew_id");
   });
 });

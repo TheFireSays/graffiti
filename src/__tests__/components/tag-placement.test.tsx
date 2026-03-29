@@ -1,5 +1,3 @@
-import React from "react";
-
 // Mock supabase BEFORE any store imports
 jest.mock("@/lib/supabase", () => ({
   supabase: {

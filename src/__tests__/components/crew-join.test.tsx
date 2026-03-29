@@ -1,5 +1,3 @@
-import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import { useCrewStore } from "@/stores/crew-store";
 
 // Mock supabase for the store

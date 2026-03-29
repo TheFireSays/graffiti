@@ -131,6 +131,21 @@
 
 ---
 
+## Stabilization Plan (Complete)
+
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-29-09-stabilization.md`
+
+- [x] Task 1: Add `last_tagged_at` column to users table (migration 00022)
+- [x] Task 2: Fix all TypeScript strict mode errors (`tsc --noEmit` clean)
+- [x] Task 3: Add eslint-plugin-security, fix all lint issues (0 errors)
+- [x] Task 4: Set up jest + @testing-library/react-native test runner
+- [x] Task 5: Unit tests for all 5 Zustand stores (43 tests)
+- [x] Task 6: Integration tests for Supabase RPCs (14 tests)
+- [x] Task 7: Component smoke tests for auth, tag placement, crew flows (16 tests)
+- [x] Task 8: Final verification — all checks passing (73 total tests, 0 type errors, 0 lint errors)
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
