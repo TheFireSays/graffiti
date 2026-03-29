@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
 import { supabase } from "../../lib/supabase";
+import { useRealtime } from "../../hooks/use-realtime";
 
 interface FeedEvent {
   id: string;
@@ -47,7 +48,47 @@ export function FeedTab() {
     loadFeed();
   }, []);
 
-  if (loading) return <Text style={styles.empty}>Loading feed...</Text>;
+  // Realtime: prepend new events
+  const handleNewEvent = useCallback(async (payload: any) => {
+    if (payload.eventType !== "INSERT") return;
+    const row = payload.new;
+
+    // Fetch related data for the new event
+    const { data } = await supabase
+      .from("activity_feed")
+      .select(`
+        id,
+        event_type,
+        created_at,
+        actor:users!activity_feed_actor_id_fkey(username),
+        crew:crews(name),
+        zone:zones(name)
+      `)
+      .eq("id", row.id)
+      .single();
+
+    if (data) {
+      const newEvent: FeedEvent = {
+        id: data.id,
+        eventType: data.event_type,
+        actorUsername: (data as any).actor?.username ?? "Unknown",
+        crewName: (data as any).crew?.name ?? null,
+        zoneName: (data as any).zone?.name ?? null,
+        createdAt: data.created_at,
+      };
+      setEvents((prev) => [newEvent, ...prev].slice(0, 50));
+    }
+  }, []);
+
+  useRealtime({
+    table: "activity_feed",
+    event: "INSERT",
+    onEvent: handleNewEvent,
+  });
+
+  if (loading) {
+    return <Text style={styles.empty}>Loading feed...</Text>;
+  }
 
   return (
     <FlatList
