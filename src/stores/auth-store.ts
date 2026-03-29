@@ -10,8 +10,10 @@ interface AuthState {
   user: User | null;
   profile: AppUser | null;
   isLoading: boolean;
+  needsOnboarding: boolean;
   setSession: (session: Session | null) => void;
   fetchProfile: () => Promise<void>;
+  completeOnboarding: () => void;
   signOut: () => Promise<void>;
 }
 
@@ -20,6 +22,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   profile: null,
   isLoading: true,
+  needsOnboarding: false,
 
   setSession: (session) => {
     set({
@@ -30,7 +33,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (session?.user) {
       get().fetchProfile();
     } else {
-      set({ profile: null });
+      set({ profile: null, needsOnboarding: false });
     }
   },
 
@@ -45,12 +48,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       .single();
 
     if (!error && data) {
-      set({ profile: data });
+      const emailPrefix = user.email
+        ? user.email.split("@")[0]
+        : null;
+      const needsOnboarding = emailPrefix !== null && data.username === emailPrefix;
+      set({ profile: data, needsOnboarding });
     }
+  },
+
+  completeOnboarding: () => {
+    set({ needsOnboarding: false });
   },
 
   signOut: async () => {
     await supabase.auth.signOut();
-    set({ session: null, user: null, profile: null });
+    set({ session: null, user: null, profile: null, needsOnboarding: false });
   },
 }));
