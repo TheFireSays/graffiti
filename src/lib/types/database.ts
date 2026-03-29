@@ -245,6 +245,79 @@ export type Database = {
           },
         ]
       }
+      notification_queue: {
+        Row: {
+          body: string
+          created_at: string
+          event_type: string
+          id: string
+          is_read: boolean
+          metadata: Json
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          event_type: string
+          id?: string
+          is_read?: boolean
+          metadata?: Json
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          is_read?: boolean
+          metadata?: Json
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_queue_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      push_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          platform: string
+          token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform: string
+          token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform?: string
+          token?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_tokens_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reports: {
         Row: {
           created_at: string
@@ -455,6 +528,7 @@ export type Database = {
           display_name: string
           id: string
           is_banned: boolean
+          last_tagged_at: string | null
           level: number
           spray_cans: number
           username: string
@@ -467,6 +541,7 @@ export type Database = {
           display_name?: string
           id: string
           is_banned?: boolean
+          last_tagged_at?: string | null
           level?: number
           spray_cans?: number
           username: string
@@ -479,6 +554,7 @@ export type Database = {
           display_name?: string
           id?: string
           is_banned?: boolean
+          last_tagged_at?: string | null
           level?: number
           spray_cans?: number
           username?: string
@@ -545,6 +621,10 @@ export type Database = {
           zone_name: string
         }[]
       }
+      create_crew: {
+        Args: { p_abbreviation: string; p_color: string; p_name: string }
+        Returns: Json
+      }
       decay_expired_tags: { Args: never; Returns: Json }
       find_zone_for_point: {
         Args: { p_lat: number; p_lng: number }
@@ -569,6 +649,7 @@ export type Database = {
           username: string
         }[]
       }
+      get_unread_notification_count: { Args: never; Returns: number }
       get_zones_for_map: {
         Args: never
         Returns: {
@@ -581,40 +662,46 @@ export type Database = {
           tag_counts: Json
         }[]
       }
-      place_tag_scored: {
-        Args: {
-          p_compass_heading: number
-          p_custom_colors: Json
-          p_go_over_tag_id?: string
-          p_lat: number
-          p_lng: number
-          p_tag_image_id: string
-        }
+      join_crew: { Args: { p_invite_code: string }; Returns: Json }
+      leave_crew: { Args: never; Returns: Json }
+      mark_notifications_read: {
+        Args: { p_notification_ids: string[] }
         Returns: Json
       }
-      create_crew: {
-        Args: {
-          p_name: string
-          p_abbreviation: string
-          p_color: string
-        }
+      place_tag_scored:
+        | {
+            Args: {
+              p_compass_heading: number
+              p_custom_colors: Json
+              p_go_over_tag_id?: string
+              p_lat: number
+              p_lng: number
+              p_tag_image_id: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_compass_heading: number
+              p_custom_colors: Json
+              p_go_over_tag_id?: string
+              p_lat: number
+              p_lng: number
+              p_tag_image_id: string
+              p_user_id: string
+            }
+            Returns: Json
+          }
+      register_push_token: {
+        Args: { p_platform: string; p_token: string }
         Returns: Json
       }
-      join_crew: {
-        Args: {
-          p_invite_code: string
-        }
-        Returns: Json
-      }
-      leave_crew: {
-        Args: Record<string, never>
-        Returns: Json
-      }
+      unregister_push_token: { Args: { p_token: string }; Returns: Json }
       update_profile: {
         Args: {
-          p_username?: string
-          p_display_name?: string
           p_avatar_url?: string
+          p_display_name?: string
+          p_username?: string
         }
         Returns: Json
       }
