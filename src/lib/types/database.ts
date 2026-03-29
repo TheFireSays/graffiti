@@ -289,6 +289,7 @@ export type Database = {
       push_tokens: {
         Row: {
           created_at: string
+          device_fingerprint: string | null
           id: string
           platform: string
           token: string
@@ -296,6 +297,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          device_fingerprint?: string | null
           id?: string
           platform: string
           token: string
@@ -303,6 +305,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          device_fingerprint?: string | null
           id?: string
           platform?: string
           token?: string
@@ -405,6 +408,41 @@ export type Database = {
           source?: string
         }
         Relationships: []
+      }
+      suspicious_activity: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json
+          reason: string
+          reviewed: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metadata?: Json
+          reason: string
+          reviewed?: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json
+          reason?: string
+          reviewed?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suspicious_activity_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tag_images: {
         Row: {
@@ -630,6 +668,10 @@ export type Database = {
       find_zone_for_point: {
         Args: { p_lat: number; p_lng: number }
         Returns: string
+      }
+      flag_suspicious_activity: {
+        Args: { p_metadata?: Json; p_reason: string; p_user_id: string }
+        Returns: undefined
       }
       get_constant: { Args: { p_key: string }; Returns: number }
       get_tags_for_map: {
