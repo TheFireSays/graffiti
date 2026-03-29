@@ -1,4 +1,4 @@
-import { View, Text, Pressable, FlatList, StyleSheet } from "react-native";
+import { View, Text, Image, Pressable, FlatList, StyleSheet } from "react-native";
 import { useTagStore, TagImageOption } from "../../stores/tag-store";
 
 interface TagLibrarySheetProps {
@@ -48,7 +48,11 @@ export function TagLibrarySheet({ onClose }: TagLibrarySheetProps) {
             style={[styles.tagItem, selectedImage?.id === item.id && styles.tagItemSelected]}
             onPress={() => handleSelect(item)}
           >
-            <View style={[styles.tagPreview, { backgroundColor: item.customizableColors[0]?.default ?? "#666" }]} />
+            {item.imageUrl && item.imageUrl !== "placeholder" ? (
+              <Image source={{ uri: item.imageUrl }} style={styles.tagImage} />
+            ) : (
+              <View style={[styles.tagPreview, { backgroundColor: item.customizableColors[0]?.default ?? "#666" }]} />
+            )}
             <View style={styles.tagInfo}>
               <Text style={styles.tagName}>{item.name}</Text>
               <Text style={styles.tagMeta}>
@@ -75,6 +79,7 @@ const styles = StyleSheet.create({
   tagItem: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12, paddingHorizontal: 12, borderRadius: 12 },
   tagItemSelected: { backgroundColor: "#2a2a4a" },
   tagPreview: { width: 44, height: 44, borderRadius: 8 },
+  tagImage: { width: 44, height: 44, borderRadius: 8 },
   tagInfo: { flex: 1 },
   tagName: { color: "#fff", fontSize: 15, fontWeight: "600" },
   tagMeta: { color: "#666", fontSize: 12, marginTop: 2, textTransform: "capitalize" },

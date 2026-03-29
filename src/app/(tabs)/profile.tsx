@@ -5,6 +5,7 @@ import { useProfileStore } from "../../stores/profile-store";
 import { StatCards } from "../../components/profile/stat-cards";
 import { TagHistory } from "../../components/profile/tag-history";
 import { Leaderboards } from "../../components/profile/leaderboards";
+import { AvatarPicker } from "../../components/profile/avatar-picker";
 
 export default function ProfileScreen() {
   const profile = useAuthStore((s) => s.profile);
@@ -38,11 +39,7 @@ export default function ProfileScreen() {
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>
-            {profile.username.charAt(0).toUpperCase()}
-          </Text>
-        </View>
+        <AvatarPicker />
         <Text style={styles.username}>{profile.username}</Text>
         {profile.crew_id && (
           <Text style={styles.crewLabel}>
