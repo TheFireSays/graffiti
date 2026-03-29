@@ -115,8 +115,20 @@ When all 19 scaffolding tasks are complete:
 
 ---
 
-## Credentials Needed
+## Credentials
 
-See `.env.local` (created during Task 3 from `supabase start` output). If it doesn't exist yet, it gets created in Task 3.
+### Local dev (tonight's work)
+`.env.local` is created during Task 3 from `supabase start` output. If it doesn't exist, Task 3 creates it.
 
-For Supabase Cloud (production) — not needed for local dev work tonight. Tonight is all local.
+### Supabase Cloud (production — for deployment tasks)
+Credentials are in `.env.production` (gitignored). The account email and password are already saved there.
+
+**Before any `supabase db push` or production deploy**, fill in the missing values in `.env.production`:
+1. Log in at supabase.com with the credentials in `.env.production`
+2. Open the project → Settings → API
+3. Copy **Project URL** → `EXPO_PUBLIC_SUPABASE_URL`
+4. Copy **anon / public** key → `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+5. Copy **service_role / secret** key → `SUPABASE_SERVICE_ROLE_KEY`
+6. Copy the project reference ID from the URL (e.g. `abcdefghijklmnop`) → `SUPABASE_PROJECT_REF`
+
+Tonight's Tasks 3–19 are all local — `.env.production` is not needed until the deployment subsystem.
