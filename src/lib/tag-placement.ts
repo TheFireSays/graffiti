@@ -1,7 +1,6 @@
 import { supabase } from "./supabase";
 
 interface PlacementRequest {
-  userId: string;
   tagImageId: string;
   customColors: Record<string, string>;
   latitude: number;
@@ -25,7 +24,6 @@ interface PlacementResult {
 
 export async function placeTag(req: PlacementRequest): Promise<PlacementResult> {
   const { data, error } = await supabase.rpc("place_tag_scored", {
-    p_user_id: req.userId,
     p_tag_image_id: req.tagImageId,
     p_custom_colors: req.customColors,
     p_lng: req.longitude,

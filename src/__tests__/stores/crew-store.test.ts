@@ -4,10 +4,12 @@ import { supabase } from "@/lib/supabase";
 jest.mock("@/lib/supabase", () => ({
   supabase: {
     from: jest.fn(),
+    rpc: jest.fn(),
   },
 }));
 
 const mockFrom = supabase.from as jest.Mock;
+const mockRpc = supabase.rpc as jest.Mock;
 
 function resetStore() {
   useCrewStore.setState({
@@ -89,136 +91,109 @@ describe("useCrewStore", () => {
   });
 
   describe("createCrew", () => {
-    it("creates crew, adds founder, updates user", async () => {
-      // First call: insert crew
-      const insertChain: any = {
-        insert: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: { id: "c-new" }, error: null }),
-      };
-      // Second call: insert crew_member
-      const memberChain: any = {
-        insert: jest.fn().mockResolvedValue({ error: null }),
-      };
-      // Third call: update user
-      const userChain: any = {
-        update: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockResolvedValue({ error: null }),
-      };
+    it("calls create_crew RPC and returns success", async () => {
+      mockRpc.mockResolvedValue({
+        data: { success: true, crew_id: "c-new" },
+        error: null,
+      });
 
-      mockFrom
-        .mockReturnValueOnce(insertChain)
-        .mockReturnValueOnce(memberChain)
-        .mockReturnValueOnce(userChain);
-
-      const result = await useCrewStore.getState().createCrew("MyCrew", "MC", "#00FF00", "u1");
+      const result = await useCrewStore.getState().createCrew("MyCrew", "MC", "#00FF00");
       expect(result.success).toBe(true);
+      expect(mockRpc).toHaveBeenCalledWith("create_crew", {
+        p_name: "MyCrew",
+        p_abbreviation: "MC",
+        p_color: "#00FF00",
+      });
     });
 
-    it("returns error when crew insert fails", async () => {
-      const insertChain: any = {
-        insert: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: null, error: { message: "Name taken" } }),
-      };
-      mockFrom.mockReturnValue(insertChain);
+    it("returns error when RPC fails", async () => {
+      mockRpc.mockResolvedValue({
+        data: null,
+        error: { message: "Name taken" },
+      });
 
-      const result = await useCrewStore.getState().createCrew("Taken", "TK", "#000", "u1");
+      const result = await useCrewStore.getState().createCrew("Taken", "TK", "#000");
       expect(result.success).toBe(false);
       expect(result.error).toBe("Name taken");
+    });
+
+    it("returns error from RPC business logic", async () => {
+      mockRpc.mockResolvedValue({
+        data: { success: false, error: "Already in a crew" },
+        error: null,
+      });
+
+      const result = await useCrewStore.getState().createCrew("X", "XX", "#000");
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Already in a crew");
     });
   });
 
   describe("joinCrew", () => {
-    it("validates invite and joins crew", async () => {
-      // Find invite
-      const inviteChain: any = {
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
-          data: { id: "inv1", crew_id: "c1", max_uses: 10, use_count: 3, expires_at: null },
-          error: null,
-        }),
-      };
-      // Insert member
-      const memberChain: any = {
-        insert: jest.fn().mockResolvedValue({ error: null }),
-      };
-      // Update user
-      const userChain: any = {
-        update: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockResolvedValue({ error: null }),
-      };
-      // Update invite use_count
-      const updateInviteChain: any = {
-        update: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockResolvedValue({ error: null }),
-      };
+    it("calls join_crew RPC and returns success", async () => {
+      mockRpc.mockResolvedValue({
+        data: { success: true, crew_id: "c1" },
+        error: null,
+      });
 
-      mockFrom
-        .mockReturnValueOnce(inviteChain)
-        .mockReturnValueOnce(memberChain)
-        .mockReturnValueOnce(userChain)
-        .mockReturnValueOnce(updateInviteChain);
-
-      const result = await useCrewStore.getState().joinCrew("ABC123", "u2");
+      const result = await useCrewStore.getState().joinCrew("ABC123");
       expect(result.success).toBe(true);
+      expect(mockRpc).toHaveBeenCalledWith("join_crew", {
+        p_invite_code: "ABC123",
+      });
     });
 
-    it("rejects invalid invite code", async () => {
-      const inviteChain: any = {
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({ data: null, error: { message: "not found" } }),
-      };
-      mockFrom.mockReturnValue(inviteChain);
+    it("returns error from RPC on invalid code", async () => {
+      mockRpc.mockResolvedValue({
+        data: { success: false, error: "Invalid invite code" },
+        error: null,
+      });
 
-      const result = await useCrewStore.getState().joinCrew("INVALID", "u2");
+      const result = await useCrewStore.getState().joinCrew("INVALID");
       expect(result.success).toBe(false);
       expect(result.error).toBe("Invalid invite code");
     });
 
-    it("rejects fully used invite", async () => {
-      const inviteChain: any = {
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
-          data: { id: "inv1", crew_id: "c1", max_uses: 5, use_count: 5, expires_at: null },
-          error: null,
-        }),
-      };
-      mockFrom.mockReturnValue(inviteChain);
+    it("returns error from RPC on fully used invite", async () => {
+      mockRpc.mockResolvedValue({
+        data: { success: false, error: "This invite has been fully used" },
+        error: null,
+      });
 
-      const result = await useCrewStore.getState().joinCrew("USED", "u2");
+      const result = await useCrewStore.getState().joinCrew("USED");
       expect(result.success).toBe(false);
       expect(result.error).toBe("This invite has been fully used");
     });
   });
 
   describe("leaveCrew", () => {
-    it("removes member and clears crew state", async () => {
-      const deleteChain: any = {
-        delete: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-      };
-      deleteChain.eq.mockReturnValueOnce(deleteChain).mockResolvedValueOnce({ error: null });
-
-      const userChain: any = {
-        update: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockResolvedValue({ error: null }),
-      };
-
-      mockFrom.mockReturnValueOnce(deleteChain).mockReturnValueOnce(userChain);
+    it("calls leave_crew RPC and clears crew state", async () => {
+      mockRpc.mockResolvedValue({
+        data: { success: true },
+        error: null,
+      });
 
       useCrewStore.setState({
         crew: { id: "c1", name: "Crew" } as any,
         members: [{ userId: "u1" } as any],
       });
 
-      const result = await useCrewStore.getState().leaveCrew("c1", "u1");
+      const result = await useCrewStore.getState().leaveCrew();
       expect(result.success).toBe(true);
       expect(useCrewStore.getState().crew).toBeNull();
       expect(useCrewStore.getState().members).toEqual([]);
+      expect(mockRpc).toHaveBeenCalledWith("leave_crew");
+    });
+
+    it("returns error when founder tries to leave", async () => {
+      mockRpc.mockResolvedValue({
+        data: { success: false, error: "Founders cannot leave — transfer ownership or disband first" },
+        error: null,
+      });
+
+      const result = await useCrewStore.getState().leaveCrew();
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("Founders cannot leave");
     });
   });
 

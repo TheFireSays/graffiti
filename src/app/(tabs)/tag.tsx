@@ -43,7 +43,6 @@ export default function TagScreen() {
     setPlacementError(null);
 
     const result = await placeTag({
-      userId: profile.id,
       tagImageId: selectedImage.id,
       customColors,
       latitude: location.latitude,

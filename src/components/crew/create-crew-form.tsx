@@ -33,7 +33,7 @@ export function CreateCrewForm({ onBack, onCreated }: CreateCrewFormProps) {
     setLoading(true);
     setError("");
 
-    const result = await createCrew(name.trim(), abbreviation.trim(), color, profile.id);
+    const result = await createCrew(name.trim(), abbreviation.trim(), color);
     setLoading(false);
 
     if (result.success) {

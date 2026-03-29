@@ -33,7 +33,7 @@ export function CrewDashboard({
       return;
     }
 
-    const result = await leaveCrew(crew.id, userId);
+    const result = await leaveCrew();
     if (result.success) {
       onLeft();
     }

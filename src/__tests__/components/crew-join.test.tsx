@@ -4,6 +4,7 @@ import { useCrewStore } from "@/stores/crew-store";
 jest.mock("@/lib/supabase", () => ({
   supabase: {
     from: jest.fn(),
+    rpc: jest.fn(),
   },
 }));
 

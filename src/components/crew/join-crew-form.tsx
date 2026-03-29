@@ -25,7 +25,7 @@ export function JoinCrewForm({ onBack, onJoined }: JoinCrewFormProps) {
     setLoading(true);
     setError("");
 
-    const result = await joinCrew(code.trim(), profile.id);
+    const result = await joinCrew(code.trim());
     setLoading(false);
 
     if (result.success) {

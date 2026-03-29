@@ -589,7 +589,32 @@ export type Database = {
           p_lat: number
           p_lng: number
           p_tag_image_id: string
-          p_user_id: string
+        }
+        Returns: Json
+      }
+      create_crew: {
+        Args: {
+          p_name: string
+          p_abbreviation: string
+          p_color: string
+        }
+        Returns: Json
+      }
+      join_crew: {
+        Args: {
+          p_invite_code: string
+        }
+        Returns: Json
+      }
+      leave_crew: {
+        Args: Record<string, never>
+        Returns: Json
+      }
+      update_profile: {
+        Args: {
+          p_username?: string
+          p_display_name?: string
+          p_avatar_url?: string
         }
         Returns: Json
       }

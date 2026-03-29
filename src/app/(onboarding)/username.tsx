@@ -57,15 +57,22 @@ export default function UsernameScreen() {
       return;
     }
 
-    const { error: updateError } = await supabase
-      .from("users")
-      .update({ username: trimmed, display_name: trimmed })
-      .eq("id", user.id);
+    const { data: updateResult, error: updateError } = await supabase
+      .rpc("update_profile", {
+        p_username: trimmed,
+        p_display_name: trimmed,
+      });
 
     setLoading(false);
 
     if (updateError) {
       setError(updateError.message);
+      return;
+    }
+
+    const result = updateResult as any;
+    if (result && !result.success) {
+      setError(result.error ?? "Failed to update profile");
       return;
     }
 

@@ -146,6 +146,19 @@
 
 ---
 
+## Security Hardening Plan (In Progress)
+
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-29-10-security-hardening.md`
+
+- [x] Task 1: Lock down `place_tag_scored` — auth.uid() + rate limiting (migration 00023)
+- [x] Task 2: Transactional crew RPCs — create_crew, join_crew, leave_crew (migration 00024)
+- [x] Task 3: Fix zone control trigger — recency tie-break + safe actor_id (migration 00025)
+- [x] Task 4: Fix crew member_count default 0 (migration 00026)
+- [x] Task 5: Restrict user profile updates to safe fields via RPC (migration 00027)
+- [x] Task 6: Update tests — 75 tests passing, 0 type errors, 0 lint errors
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).

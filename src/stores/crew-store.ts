@@ -44,10 +44,10 @@ interface CrewState {
   loadCrew: (crewId: string) => Promise<void>;
   loadMembers: (crewId: string) => Promise<void>;
   loadInvites: (crewId: string) => Promise<void>;
-  createCrew: (name: string, abbreviation: string, color: string, userId: string) => Promise<{ success: boolean; error?: string }>;
-  joinCrew: (inviteCode: string, userId: string) => Promise<{ success: boolean; error?: string }>;
+  createCrew: (name: string, abbreviation: string, color: string) => Promise<{ success: boolean; error?: string }>;
+  joinCrew: (inviteCode: string) => Promise<{ success: boolean; error?: string }>;
   createInvite: (crewId: string, userId: string, maxUses: number) => Promise<{ success: boolean; code?: string; error?: string }>;
-  leaveCrew: (crewId: string, userId: string) => Promise<{ success: boolean; error?: string }>;
+  leaveCrew: () => Promise<{ success: boolean; error?: string }>;
   clearCrew: () => void;
 }
 
@@ -147,97 +147,38 @@ export const useCrewStore = create<CrewState>((set, get) => ({
     }
   },
 
-  createCrew: async (name, abbreviation, color, userId) => {
-    // 1. Create the crew
-    const { data: crew, error: crewError } = await supabase
-      .from("crews")
-      .insert({
-        name,
-        abbreviation: abbreviation.toUpperCase(),
-        color,
-        founder_id: userId,
-      })
-      .select("id")
-      .single();
+  createCrew: async (name, abbreviation, color) => {
+    const { data, error } = await supabase.rpc("create_crew", {
+      p_name: name,
+      p_abbreviation: abbreviation,
+      p_color: color,
+    });
 
-    if (crewError) {
-      return { success: false, error: crewError.message };
+    if (error) {
+      return { success: false, error: error.message };
     }
 
-    // 2. Add founder as OG member
-    const { error: memberError } = await supabase
-      .from("crew_members")
-      .insert({
-        crew_id: crew.id,
-        user_id: userId,
-        role: "og",
-      });
-
-    if (memberError) {
-      return { success: false, error: memberError.message };
-    }
-
-    // 3. Update user's crew_id
-    const { error: userError } = await supabase
-      .from("users")
-      .update({ crew_id: crew.id })
-      .eq("id", userId);
-
-    if (userError) {
-      return { success: false, error: userError.message };
+    const result = data as any;
+    if (!result.success) {
+      return { success: false, error: result.error };
     }
 
     return { success: true };
   },
 
-  joinCrew: async (inviteCode, userId) => {
-    // 1. Find the invite
-    const { data: invite, error: findError } = await supabase
-      .from("invites")
-      .select("id, crew_id, max_uses, use_count, expires_at")
-      .eq("code", inviteCode.trim())
-      .single();
+  joinCrew: async (inviteCode) => {
+    const { data, error } = await supabase.rpc("join_crew", {
+      p_invite_code: inviteCode,
+    });
 
-    if (findError || !invite) {
-      return { success: false, error: "Invalid invite code" };
+    if (error) {
+      return { success: false, error: error.message };
     }
 
-    // 2. Validate invite
-    if (invite.use_count >= invite.max_uses) {
-      return { success: false, error: "This invite has been fully used" };
+    const result = data as any;
+    if (!result.success) {
+      return { success: false, error: result.error };
     }
-
-    if (invite.expires_at && new Date(invite.expires_at) < new Date()) {
-      return { success: false, error: "This invite has expired" };
-    }
-
-    // 3. Add user as member
-    const { error: memberError } = await supabase
-      .from("crew_members")
-      .insert({
-        crew_id: invite.crew_id,
-        user_id: userId,
-        role: "member",
-      });
-
-    if (memberError) {
-      if (memberError.code === "23505") {
-        return { success: false, error: "You are already in this crew" };
-      }
-      return { success: false, error: memberError.message };
-    }
-
-    // 4. Update user's crew_id
-    await supabase
-      .from("users")
-      .update({ crew_id: invite.crew_id })
-      .eq("id", userId);
-
-    // 5. Increment invite use_count (service role would be better, but OK for MVP)
-    await supabase
-      .from("invites")
-      .update({ use_count: invite.use_count + 1 })
-      .eq("id", invite.id);
 
     return { success: true };
   },
@@ -260,21 +201,17 @@ export const useCrewStore = create<CrewState>((set, get) => ({
     return { success: true, code: data.code };
   },
 
-  leaveCrew: async (crewId, userId) => {
-    const { error: memberError } = await supabase
-      .from("crew_members")
-      .delete()
-      .eq("crew_id", crewId)
-      .eq("user_id", userId);
+  leaveCrew: async () => {
+    const { data, error } = await supabase.rpc("leave_crew");
 
-    if (memberError) {
-      return { success: false, error: memberError.message };
+    if (error) {
+      return { success: false, error: error.message };
     }
 
-    await supabase
-      .from("users")
-      .update({ crew_id: null })
-      .eq("id", userId);
+    const result = data as any;
+    if (!result.success) {
+      return { success: false, error: result.error };
+    }
 
     set({ crew: null, members: [], invites: [], userRole: null });
     return { success: true };

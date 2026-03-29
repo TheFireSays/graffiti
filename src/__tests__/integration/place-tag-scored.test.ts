@@ -15,7 +15,6 @@ describe("placeTag (place_tag_scored RPC)", () => {
   });
 
   const baseRequest = {
-    userId: "u1000000-0000-0000-0000-000000000001",
     tagImageId: "b1000000-0000-0000-0000-000000000001",
     customColors: { fill: "#FF0000" },
     latitude: 30.2672,
@@ -42,7 +41,6 @@ describe("placeTag (place_tag_scored RPC)", () => {
     const result = await placeTag(baseRequest);
 
     expect(mockRpc).toHaveBeenCalledWith("place_tag_scored", {
-      p_user_id: baseRequest.userId,
       p_tag_image_id: baseRequest.tagImageId,
       p_custom_colors: baseRequest.customColors,
       p_lng: baseRequest.longitude,
