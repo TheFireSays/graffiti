@@ -1,0 +1,25 @@
+# CodeRabbit AI Code Review Configuration
+# Docs: https://docs.coderabbit.ai/guides/configure-coderabbit
+
+language: en-US
+
+reviews:
+  enabled: true
+  auto_review:
+    enabled: true
+  profile: assertive
+  path_filters:
+    - "!node_modules/**"
+    - "!.expo/**"
+    - "!ios/build/**"
+    - "!ios/Pods/**"
+    - "!android/build/**"
+    - "!android/app/build/**"
+    - "!assets/**"
+  path_instructions:
+    - path: "**/*.{ts,tsx}"
+      instructions: >
+        This is a React Native/Expo SDK 55 mobile app using TypeScript,
+        Supabase (PostGIS), Zustand, and expo-secure-store. Focus reviews on:
+        security (especially auth/RLS), TypeScript type safety, React Native
+        performance, and Supabase query patterns.
