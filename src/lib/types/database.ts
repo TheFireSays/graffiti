@@ -519,7 +519,36 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_tags_for_map: {
+        Args: never
+        Returns: {
+          compass_heading: number
+          created_at: string
+          crew_abbreviation: string
+          crew_color: string
+          crew_id: string
+          id: string
+          lat: number
+          lng: number
+          status: string
+          tag_category: string
+          tag_image_name: string
+          user_id: string
+          username: string
+        }[]
+      }
+      get_zones_for_map: {
+        Args: never
+        Returns: {
+          boundary_geojson: string
+          controlling_crew_id: string
+          crew_abbreviation: string
+          crew_color: string
+          id: string
+          name: string
+          tag_counts: Json
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
