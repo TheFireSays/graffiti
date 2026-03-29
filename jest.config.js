@@ -13,4 +13,5 @@ module.exports = {
     "!src/lib/types/**",
   ],
   setupFiles: ["./jest.setup.js"],
+  modulePathIgnorePatterns: ["<rootDir>/node_modules/expo/src/winter/"],
 };

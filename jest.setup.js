@@ -1,3 +1,15 @@
+// Fix for Expo SDK 55 winter runtime globals
+// These must be defined before expo/runtime.native.ts tries to lazily install them
+if (typeof globalThis.__ExpoImportMetaRegistry === "undefined") {
+  globalThis.__ExpoImportMetaRegistry = {
+    register: () => {},
+    get: () => ({}),
+  };
+}
+if (typeof globalThis.structuredClone === "undefined") {
+  globalThis.structuredClone = (val) => JSON.parse(JSON.stringify(val));
+}
+
 // Mock expo-secure-store
 jest.mock("expo-secure-store", () => ({
   getItemAsync: jest.fn().mockResolvedValue(null),
