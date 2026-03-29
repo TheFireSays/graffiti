@@ -220,6 +220,12 @@
 - [x] Task 4: Integration tests — 2 tests for delete_account + update_profile
 - [x] Task 5: Full verification — 98 tests, 0 type errors, 0 lint errors
 
+**Plan (expanded):** `/home/overlord/projects/docs/superpowers/plans/2026-03-29-14-settings-profile-editing.md`
+
+- [x] Task 1: `src/app/settings.tsx` — full settings screen with username/display name editing, profanity filter, sign out, delete account confirmation dialog
+- [x] Task 2: Profile tab — Settings button updated to navigate to `/settings` (outside tabs)
+- [x] Task 3: E2E verification — 0 lint errors, 0 type errors, 98 tests passing
+
 ---
 
 ## Notes / Errors

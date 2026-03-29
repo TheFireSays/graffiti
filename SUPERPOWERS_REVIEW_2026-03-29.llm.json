@@ -1,0 +1,494 @@
+{
+  "meta": {
+    "title": "Superpowers Review",
+    "date": "2026-03-29",
+    "project_root": "/home/overlord/projects/graffiti",
+    "source_docs_root": "/home/overlord/projects/docs/superpowers",
+    "review_type": "spec_plan_research_vs_codebase",
+    "intended_consumer": "LLM",
+    "source_of_truth_rule": "When docs and code disagree, prefer current code and current migrations as implementation truth."
+  },
+  "overall_assessment": {
+    "status": "prototype_concept_valid_but_backend_not_ready_for_competitive_production",
+    "summary": "The product direction is coherent, but the current codebase is still a seeded prototype. The main gaps are backend trust, crew/invite integrity, zone-control correctness, feature/spec mismatch, and test drift.",
+    "highest_priority_themes": [
+      "Tighten trust boundaries and RLS",
+      "Replace multi-step client mutations with transactional RPCs",
+      "Fix zone-control correctness before adding more game features",
+      "Align spec claims with what the app actually does today",
+      "Resolve doc/code/test drift"
+    ]
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "critical",
+      "title": "Competitive game mutations are still too client-trusting",
+      "summary": "Authenticated clients can still bypass intended server-controlled game flows.",
+      "evidence": [
+        {
+          "ref": "/home/overlord/projects/graffiti/supabase/migrations/00018_place_tag_scored.sql:17",
+          "note": "place_tag_scored accepts p_user_id from the client and does not verify auth.uid()."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/supabase/migrations/00012_create_rls_policies.sql:19",
+          "note": "users table still allows direct client profile updates."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/supabase/migrations/00012_create_rls_policies.sql:94",
+          "note": "tags table still allows direct client inserts."
+        }
+      ],
+      "impact": [
+        "Potential user impersonation in RPCs",
+        "Possible rule bypass via direct table writes",
+        "Competitive integrity is not credible under adversarial clients"
+      ],
+      "recommendations": [
+        "Make scored placement derive identity from auth.uid() instead of p_user_id.",
+        "Remove direct client insert access to tags.",
+        "Restrict users.update to safe profile fields or move writes behind RPCs."
+      ]
+    },
+    {
+      "id": "F2",
+      "severity": "critical",
+      "title": "Crew creation and join flows are non-atomic and invite security is too broad",
+      "summary": "Crew membership and invite usage are orchestrated by multi-step client writes with broad RLS permissions.",
+      "evidence": [
+        {
+          "ref": "/home/overlord/projects/graffiti/src/stores/crew-store.ts:150",
+          "note": "createCrew performs separate crew insert, crew_members insert, and users update."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/src/stores/crew-store.ts:193",
+          "note": "joinCrew performs separate invite read, crew_members insert, users update, and invite update."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/supabase/migrations/00012_create_rls_policies.sql:45",
+          "note": "Users can insert themselves into crew_members."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/supabase/migrations/00016_invite_lookup_policy.sql:1",
+          "note": "Any authenticated user can look up invites."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/supabase/migrations/00016_invite_lookup_policy.sql:7",
+          "note": "Any authenticated user can update invite use_count."
+        }
+      ],
+      "impact": [
+        "Partial failures can leave inconsistent membership state",
+        "Invite usage is race-prone",
+        "Invite abuse surface is larger than intended"
+      ],
+      "recommendations": [
+        "Replace create/join/leave crew flows with transactional RPCs.",
+        "Remove direct client crew_members inserts.",
+        "Only mutate invite usage inside a server-side join RPC."
+      ]
+    },
+    {
+      "id": "F3",
+      "severity": "high",
+      "title": "New crew member_count is likely wrong",
+      "summary": "A new crew appears to start at member_count = 1 and then gets incremented again when the founder is inserted into crew_members.",
+      "evidence": [
+        {
+          "ref": "/home/overlord/projects/graffiti/supabase/migrations/00003_create_crews.sql:8",
+          "note": "crews.member_count default is 1."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/supabase/migrations/00013_create_triggers.sql:25",
+          "note": "Crew member count trigger increments on insert."
+        }
+      ],
+      "impact": [
+        "Incorrect crew stats on creation",
+        "Potential leaderboard and UI inaccuracies"
+      ],
+      "recommendations": [
+        "Initialize member_count at 0 and let trigger/RPC own the count.",
+        "Prefer a single transactional source of truth for denormalized counters."
+      ]
+    },
+    {
+      "id": "F4",
+      "severity": "critical",
+      "title": "Zone-control trigger has a correctness bug and misses spec tie-break logic",
+      "summary": "Zone flip events can fail when no valid actor exists, and tie-breaking does not match the design spec.",
+      "evidence": [
+        {
+          "ref": "/home/overlord/projects/graffiti/supabase/migrations/00019_zone_control_trigger.sql:48",
+          "note": "Trigger inserts a zone_flipped event with a fallback actor_id of 00000000-...."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/supabase/migrations/00011_create_activity_feed.sql:7",
+          "note": "activity_feed.actor_id is non-null and a foreign key."
+        },
+        {
+          "ref": "/home/overlord/projects/docs/superpowers/specs/2026-03-29-graffiti-app-design.md:119",
+          "note": "Spec says ties are broken by most recent tag timestamp."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/supabase/migrations/00019_zone_control_trigger.sql:13",
+          "note": "Trigger chooses max count from jsonb without implementing recency tie-break."
+        }
+      ],
+      "impact": [
+        "Decay or edge-case zone transitions can break feed writes",
+        "Zone ownership can be nondeterministic and diverge from the spec"
+      ],
+      "recommendations": [
+        "Compute winners from tag rows, not unordered JSON only.",
+        "Implement explicit recency tie-break logic.",
+        "Use a real system actor or allow nullable actor_id for system-generated events."
+      ]
+    },
+    {
+      "id": "F5",
+      "severity": "high",
+      "title": "Solo-play implementation does not match the solo-crew design",
+      "summary": "The spec says solo players are effectively one-person crews, but the implementation still has a true no-crew state.",
+      "evidence": [
+        {
+          "ref": "/home/overlord/projects/docs/superpowers/specs/2026-03-29-graffiti-app-design.md:123",
+          "note": "Spec says solo players are mechanically identical to crews."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/src/components/crew/no-crew-view.tsx:23",
+          "note": "App still exposes a real no-crew screen."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/supabase/migrations/00018_place_tag_scored.sql:131",
+          "note": "Tags use v_user.crew_id and can therefore be crewless."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/supabase/migrations/00013_create_triggers.sql:86",
+          "note": "Zone tag_counts exclude crew_id is null."
+        }
+      ],
+      "impact": [
+        "Crewless users can tag but not participate under equal territory rules",
+        "Product claims and schema semantics disagree"
+      ],
+      "recommendations": [
+        "Either auto-create one-person crews on signup or remove the solo-crew claim from the spec."
+      ]
+    },
+    {
+      "id": "F6",
+      "severity": "high",
+      "title": "Organic zone expansion is promised but not implemented",
+      "summary": "The current app only works with pre-existing seeded zones.",
+      "evidence": [
+        {
+          "ref": "/home/overlord/projects/docs/superpowers/specs/2026-03-29-graffiti-app-design.md:98",
+          "note": "Spec says new zones should be generated when tagging outside existing zones."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/supabase/migrations/00018_place_tag_scored.sql:77",
+          "note": "Placement only looks up an existing zone."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/supabase/seed.sql:64",
+          "note": "Playable territory is currently pre-seeded."
+        }
+      ],
+      "impact": [
+        "The map does not truly expand",
+        "Exploration-first claims are overstated",
+        "The app is city-seed dependent"
+      ],
+      "recommendations": [
+        "If zone generation is MVP, implement it server-side now.",
+        "If not, downgrade the spec to a seeded-city MVP."
+      ]
+    },
+    {
+      "id": "F7",
+      "severity": "high",
+      "title": "Map and realtime architecture is not shaped for scale or proximity-based UX",
+      "summary": "Map/feed loading is global and reload-heavy rather than bounded by viewport or radius.",
+      "evidence": [
+        {
+          "ref": "/home/overlord/projects/graffiti/supabase/migrations/00014_create_map_functions.sql:27",
+          "note": "get_tags_for_map returns all active tags."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/src/stores/map-store.ts:34",
+          "note": "loadMapData fetches all zones, tags, and crews."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/src/stores/map-store.ts:52",
+          "note": "Realtime change handlers trigger full reloads."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/src/components/drawer/nearby-tab.tsx:13",
+          "note": "Nearby sorts the full tag list client-side."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/src/components/drawer/feed-tab.tsx:21",
+          "note": "Feed is a global latest-50 query."
+        }
+      ],
+      "impact": [
+        "Poor scaling as tag volume grows",
+        "Mismatch with spec's nearby/proximity framing",
+        "Unnecessary server and client work on each realtime change"
+      ],
+      "recommendations": [
+        "Bound map queries by viewport or radius.",
+        "Separate global feed from nearby feed explicitly.",
+        "Apply incremental realtime updates where possible."
+      ]
+    },
+    {
+      "id": "F8",
+      "severity": "medium",
+      "title": "The app does not yet deliver the claimed AR loop",
+      "summary": "Current implementation is camera-assisted placement, not a real nearby-tag AR overlay experience.",
+      "evidence": [
+        {
+          "ref": "/home/overlord/projects/docs/superpowers/specs/2026-03-29-graffiti-app-design.md:58",
+          "note": "Spec says nearby tags should appear overlaid in camera view."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/src/components/camera/camera-view.tsx:42",
+          "note": "Current camera screen is camera feed plus HUD only."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/src/app/(tabs)/tag.tsx:45",
+          "note": "Tag placement never passes goOverTagId."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/src/components/map/tag-detail-sheet.tsx:13",
+          "note": "Tag details expose no contest/report actions."
+        }
+      ],
+      "impact": [
+        "AR differentiator is overstated",
+        "Contesting/reporting loops are incomplete in UI"
+      ],
+      "recommendations": [
+        "Reframe current state as GPS + camera placement MVP until actual overlay behavior exists.",
+        "Add explicit report/contest affordances if they are part of MVP."
+      ]
+    },
+    {
+      "id": "F9",
+      "severity": "high",
+      "title": "Anti-cheat and rate limiting are named in docs but not materially implemented",
+      "summary": "The schema has a last_tagged_at column, but the placement path does not use it and there is no visible anti-spoof logic.",
+      "evidence": [
+        {
+          "ref": "/home/overlord/projects/docs/superpowers/research/2026-03-29-competitive-analysis.md:182",
+          "note": "Research says anti-cheat from day 1 is critical."
+        },
+        {
+          "ref": "/home/overlord/projects/docs/superpowers/specs/2026-03-29-graffiti-app-design.md:502",
+          "note": "Spec references movement checks and device attestation."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/supabase/migrations/00022_add_last_tagged_at.sql:1",
+          "note": "Rate-limit column exists."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/supabase/migrations/00018_place_tag_scored.sql:149",
+          "note": "Placement updates XP/spray but does not enforce last_tagged_at or cooldowns."
+        }
+      ],
+      "impact": [
+        "Spam and spoof abuse remain open",
+        "The most important category risk is still largely unaddressed"
+      ],
+      "recommendations": [
+        "Implement minimum viable cooldowns and movement sanity checks inside placement RPCs.",
+        "Downgrade anti-cheat claims in docs until real controls exist."
+      ]
+    },
+    {
+      "id": "F10",
+      "severity": "medium",
+      "title": "Architecture story is inconsistent across spec and plans",
+      "summary": "Docs disagree about whether core game logic lives in Edge Functions, direct client writes, or Postgres RPCs.",
+      "evidence": [
+        {
+          "ref": "/home/overlord/projects/docs/superpowers/specs/2026-03-29-graffiti-app-design.md:22",
+          "note": "Spec says server logic uses Supabase Edge Functions."
+        },
+        {
+          "ref": "/home/overlord/projects/docs/superpowers/plans/2026-03-29-04-ar-camera-tag-placement.md:7",
+          "note": "AR plan says client queries PostGIS and inserts tags directly before scored validation exists."
+        },
+        {
+          "ref": "/home/overlord/projects/docs/superpowers/plans/2026-03-29-07-scoring-xp-zone-control.md:7",
+          "note": "Scoring plan moves core logic into Postgres functions via RPC."
+        }
+      ],
+      "impact": [
+        "Creates planning ambiguity",
+        "Makes it easier for implementation and docs to diverge"
+      ],
+      "recommendations": [
+        "Pick one authoritative mutation architecture and rewrite docs accordingly.",
+        "For MVP, Postgres RPC + strict RLS is the simplest coherent choice."
+      ]
+    },
+    {
+      "id": "F11",
+      "severity": "high",
+      "title": "Doc, code, and test drift is already visible",
+      "summary": "Jest passes, but TypeScript fails due stale integration-test assumptions.",
+      "evidence": [
+        {
+          "ref": "/home/overlord/projects/graffiti/src/__tests__/integration/tag-decay.test.ts:20",
+          "note": "Test file still carries stale assumptions around decay naming and shapes."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/src/__tests__/integration/zone-control.test.ts:53",
+          "note": "Zone-control tests reference stale event naming/assumptions."
+        },
+        {
+          "ref": "/home/overlord/projects/graffiti/src/lib/types/database.ts:548",
+          "note": "Generated types do not match what the failing tests still expect."
+        }
+      ],
+      "impact": [
+        "Passing Jest gives a false sense of stability",
+        "The repo can drift faster than docs and tests are being updated"
+      ],
+      "recommendations": [
+        "Make npx tsc --noEmit a hard gate.",
+        "Fix stale integration tests before expanding scope.",
+        "Regenerate database types after migration changes."
+      ]
+    },
+    {
+      "id": "F12",
+      "severity": "medium",
+      "title": "Project documentation is still partially template-level",
+      "summary": "The repo README is still the default Expo template instead of actual project setup and architecture documentation.",
+      "evidence": [
+        {
+          "ref": "/home/overlord/projects/graffiti/README.md:1",
+          "note": "README still contains default Expo starter content."
+        }
+      ],
+      "impact": [
+        "Poor contributor onboarding",
+        "Weakens the stated goal of building for a maintainable multi-contributor future"
+      ],
+      "recommendations": [
+        "Replace README with real setup, local Supabase, testing, and architecture instructions."
+      ]
+    }
+  ],
+  "spec_code_disagreements": [
+    {
+      "id": "D1",
+      "topic": "server_logic_location",
+      "doc_claim": "Core game logic is in Edge Functions.",
+      "current_code_reality": "Core scoring is in Postgres RPCs and the older AR plan still describes direct client-side validation/inserts.",
+      "recommended_resolution": "Standardize on Postgres RPCs + RLS for MVP and update docs to match."
+    },
+    {
+      "id": "D2",
+      "topic": "solo_play",
+      "doc_claim": "Solo players are one-person crews with the same mechanics.",
+      "current_code_reality": "The app supports a true no-crew state and null crew_id tags do not count for zone control.",
+      "recommended_resolution": "Either auto-create solo crews or remove the solo-crew claim."
+    },
+    {
+      "id": "D3",
+      "topic": "organic_zone_expansion",
+      "doc_claim": "Zones expand organically when users tag outside existing zones.",
+      "current_code_reality": "No zone creation path exists; current gameplay depends on seeded zones.",
+      "recommended_resolution": "Implement server-side zone creation or downgrade spec to seeded-city MVP."
+    },
+    {
+      "id": "D4",
+      "topic": "ar_positioning",
+      "doc_claim": "Nearby tags appear as camera overlays in AR view.",
+      "current_code_reality": "Current camera screen is a HUD over camera feed without nearby tag overlay logic.",
+      "recommended_resolution": "Reframe current state as camera-assisted placement until overlay logic exists."
+    },
+    {
+      "id": "D5",
+      "topic": "anti_cheat",
+      "doc_claim": "Anti-cheat from day 1 with movement checks and device attestation.",
+      "current_code_reality": "No meaningful anti-cheat is visible in the current placement path.",
+      "recommended_resolution": "Implement minimal anti-abuse now or reduce the strength of the claim."
+    }
+  ],
+  "recommended_next_actions": [
+    {
+      "priority": 1,
+      "action": "Lock down RLS and trust boundaries",
+      "reason": "Without this, every higher-level game system is easy to bypass."
+    },
+    {
+      "priority": 2,
+      "action": "Convert crew create/join/leave into transactional RPCs",
+      "reason": "Current client-orchestrated writes are inconsistent and too permissive."
+    },
+    {
+      "priority": 3,
+      "action": "Fix zone-control correctness",
+      "reason": "Zone control is core gameplay and currently has bug/spec issues."
+    },
+    {
+      "priority": 4,
+      "action": "Implement real placement cooldowns using last_tagged_at",
+      "reason": "Basic anti-spam belongs in MVP for a location game."
+    },
+    {
+      "priority": 5,
+      "action": "Decide whether solo users are real crews",
+      "reason": "The product and schema currently disagree on a central mechanic."
+    },
+    {
+      "priority": 6,
+      "action": "Decide whether organic zone generation is in MVP",
+      "reason": "Current implementation does not support the claim."
+    },
+    {
+      "priority": 7,
+      "action": "Fix stale integration tests and enforce TypeScript clean builds",
+      "reason": "Current green tests are misleading because tsc still fails."
+    },
+    {
+      "priority": 8,
+      "action": "Replace template README with real contributor docs",
+      "reason": "The repo is missing basic operational documentation."
+    }
+  ],
+  "suggested_prompt_for_next_llm": {
+    "goal": "Use this review as the primary critique of the current Graffiti app and superpowers docs. Prioritize actions that secure the backend and align the spec with actual implementation.",
+    "instructions": [
+      "Treat findings F1, F2, F4, F6, F7, F9, and F11 as highest priority.",
+      "When docs and code disagree, prefer current migrations and current code.",
+      "Do not assume the AR, solo-crew, anti-cheat, or organic-zone claims are already implemented.",
+      "If proposing a roadmap, put security and transactional integrity ahead of feature expansion."
+    ]
+  },
+  "verification": {
+    "checks_run": [
+      {
+        "command": "npm test -- --runInBand",
+        "result": "passed",
+        "details": "11 suites, 73 tests"
+      },
+      {
+        "command": "npm run lint",
+        "result": "passed_with_warnings",
+        "details": "0 errors, 9 warnings, warnings confined to tests"
+      },
+      {
+        "command": "npx tsc --noEmit",
+        "result": "failed",
+        "details": "Integration tests still reference stale RPC/status/type assumptions"
+      }
+    ]
+  }
+}
