@@ -1,56 +1,108 @@
-# Welcome to your Expo app 👋
+# Graffiti
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A location-based territory game where crews compete to control zones by placing GPS-anchored graffiti tags. Built with Expo/React Native and Supabase.
 
-## Get started
+## What it does
 
-1. Install dependencies
+- **Place tags** using your phone's camera + GPS to anchor virtual graffiti to real-world locations
+- **Compete for territory** — zones are controlled by the crew with the most active tags
+- **Join or create crews** with invite codes, crew colors, and shared leaderboards
+- **Progress through tiers** — unlock throw-ups and pieces as you level up from basic tags
+- **Tag decay** keeps the map dynamic — crews must revisit territory to maintain control
 
-   ```bash
-   npm install
-   ```
+## Tech stack
 
-2. Start the app
+| Layer | Tech |
+|-------|------|
+| Mobile | Expo / React Native (TypeScript) |
+| Database | Supabase (PostgreSQL + PostGIS) |
+| Auth | Supabase Auth |
+| Realtime | Supabase Realtime (WebSocket subscriptions) |
+| Maps | react-native-maps |
+| Camera | expo-camera |
+| Location | expo-location |
+| State | Zustand |
 
-   ```bash
-   npx expo start
-   ```
+Server-side game logic (scoring, zone control, crew management) runs as **Postgres RPCs** with strict RLS policies — no client-side writes for competitive entities.
 
-In the output, you'll find options to open the app in a
+## Project structure
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+src/
+  app/           # Expo Router screens (file-based routing)
+    (auth)/      # Sign-in, sign-up screens
+    (onboarding)/ # Username selection
+    (tabs)/      # Map, Tag (camera), Crew, Profile tabs
+  components/    # UI components (map, camera, crew, drawer)
+  stores/        # Zustand stores (auth, map, crew, profile, tag)
+  hooks/         # Custom hooks (location, realtime)
+  lib/           # Supabase client, geo helpers, tag placement logic
+    types/       # Generated database types
+supabase/
+  migrations/    # 27 SQL migrations (PostGIS, tables, RLS, RPCs, triggers)
+  seed.sql       # Test data (users, crews, zones, tags in Austin, TX)
+  config.toml    # Local Supabase config
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Local development
 
-### Other setup steps
+### Prerequisites
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+- Node.js 18+
+- Docker (for Supabase local)
+- Supabase CLI (`npm install -g supabase`)
+- Expo CLI (`npx expo`)
 
-## Learn more
+### Setup
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+# Install dependencies
+npm install
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+# Start Supabase (requires Docker running)
+npx supabase start
 
-## Join the community
+# Apply migrations and seed data
+npx supabase db reset
 
-Join our community of developers creating universal apps.
+# Copy the anon key from supabase start output into .env.local:
+# EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+# EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<anon key from supabase start>
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+# Start the Expo dev server
+npx expo start
+```
+
+### Running tests
+
+```bash
+# All tests (73 tests across 11 suites)
+npx jest
+
+# With coverage
+npx jest --coverage
+
+# Type checking
+npx tsc --noEmit
+
+# Linting
+npx eslint src/
+```
+
+### Database migrations
+
+Migrations are in `supabase/migrations/` and applied in order by `supabase db reset`. Key migrations:
+
+- `00001` — Enable PostGIS
+- `00002–00011` — Core tables (users, crews, tags, zones, activity feed)
+- `00012` — Row Level Security policies
+- `00017–00020` — Scoring RPCs, zone control trigger, tag decay
+- `00023–00027` — Security hardening (auth.uid() enforcement, transactional crew RPCs, restricted user updates)
+
+## Design spec
+
+Full product design: [`docs/superpowers/specs/2026-03-29-graffiti-app-design.md`](../docs/superpowers/specs/2026-03-29-graffiti-app-design.md)
+
+## Current status
+
+MVP feature-complete across: scaffolding, auth, map view, camera tag placement, crew system, profile/leaderboard, scoring/XP/zone control, activity feed/realtime, stabilization (73 tests), and security hardening.
