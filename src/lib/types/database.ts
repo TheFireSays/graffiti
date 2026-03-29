@@ -519,6 +519,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_restricted_zone: {
+        Args: { p_lat: number; p_lng: number }
+        Returns: {
+          zone_category: string
+          zone_name: string
+        }[]
+      }
+      find_zone_for_point: {
+        Args: { p_lat: number; p_lng: number }
+        Returns: string
+      }
       get_tags_for_map: {
         Args: never
         Returns: {
