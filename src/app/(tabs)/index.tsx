@@ -2,8 +2,10 @@ import { useEffect } from "react";
 import { View, StyleSheet, ActivityIndicator, Text } from "react-native";
 import { useLocation } from "../../hooks/use-location";
 import { useMapStore } from "../../stores/map-store";
+import { useProfileStore } from "../../stores/profile-store";
 import { GraffitiMapView } from "../../components/map/map-view";
 import { TagDetailSheet } from "../../components/map/tag-detail-sheet";
+import { SeasonBanner } from "../../components/map/season-banner";
 import { MapDrawer } from "../../components/drawer/map-drawer";
 
 export default function MapScreen() {
@@ -14,12 +16,15 @@ export default function MapScreen() {
   const selectTag = useMapStore((s) => s.selectTag);
   const subscribeToChanges = useMapStore((s) => s.subscribeToChanges);
   const unsubscribe = useMapStore((s) => s.unsubscribe);
+  const activeSeason = useProfileStore((s) => s.activeSeason);
+  const loadActiveSeason = useProfileStore((s) => s.loadActiveSeason);
 
   useEffect(() => {
     loadMapData();
+    loadActiveSeason();
     subscribeToChanges();
     return () => unsubscribe();
-  }, [loadMapData, subscribeToChanges, unsubscribe]);
+  }, [loadMapData, loadActiveSeason, subscribeToChanges, unsubscribe]);
 
   if (isLoading || locationLoading) {
     return (
@@ -48,6 +53,8 @@ export default function MapScreen() {
             : null
         }
       />
+
+      {activeSeason && <SeasonBanner season={activeSeason} />}
 
       {selectedTag ? (
         <TagDetailSheet tag={selectedTag} onClose={() => selectTag(null)} />
