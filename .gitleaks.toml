@@ -1,0 +1,43 @@
+# Gitleaks configuration for Graffiti AR (React Native / Expo / Supabase)
+# https://github.com/gitleaks/gitleaks
+
+title = "gitleaks config"
+
+[extend]
+# Use the default gitleaks rules as a baseline
+useDefault = true
+
+[allowlist]
+  description = "Global allowlist"
+  paths = [
+    # Test fixtures and example configs
+    '''__tests__/.*''',
+    '''__mocks__/.*''',
+    '''\.test\.(ts|tsx|js|jsx)$''',
+    '''\.spec\.(ts|tsx|js|jsx)$''',
+    '''fixtures/.*''',
+    '''test-utils/.*''',
+
+    # Example / template config files
+    '''\.env\.example$''',
+    '''\.env\.template$''',
+    '''\.env\.sample$''',
+
+    # Lock files and generated assets
+    '''package-lock\.json$''',
+    '''yarn\.lock$''',
+    '''pnpm-lock\.yaml$''',
+
+    # Documentation
+    '''docs/.*\.md$''',
+    '''README\.md$''',
+    '''PROGRESS\.md$''',
+
+    # Supabase generated types (may contain project ref in comments)
+    '''supabase/.*\.gen\.ts$''',
+
+    # Expo / React Native generated
+    '''\.expo/.*''',
+    '''android/.*''',
+    '''ios/.*''',
+  ]
