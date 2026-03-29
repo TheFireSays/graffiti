@@ -25,13 +25,24 @@ export default function ProfileScreen() {
   const isLoadingLeaderboards = useProfileStore((s) => s.isLoadingLeaderboards);
   const loadTagHistory = useProfileStore((s) => s.loadTagHistory);
   const loadLeaderboards = useProfileStore((s) => s.loadLeaderboards);
+  const activeSeason = useProfileStore((s) => s.activeSeason);
+  const seasonLeaderboard = useProfileStore((s) => s.seasonLeaderboard);
+  const loadActiveSeason = useProfileStore((s) => s.loadActiveSeason);
+  const loadSeasonLeaderboard = useProfileStore((s) => s.loadSeasonLeaderboard);
 
   useEffect(() => {
     if (profile) {
       loadTagHistory(profile.id);
       loadLeaderboards();
+      loadActiveSeason();
     }
-  }, [profile, loadTagHistory, loadLeaderboards]);
+  }, [profile, loadTagHistory, loadLeaderboards, loadActiveSeason]);
+
+  useEffect(() => {
+    if (activeSeason) {
+      loadSeasonLeaderboard(activeSeason.id);
+    }
+  }, [activeSeason, loadSeasonLeaderboard]);
 
   async function handleSaveDisplayName() {
     const trimmed = displayName.trim();
@@ -127,6 +138,8 @@ export default function ProfileScreen() {
         <Leaderboards
           topUsers={topUsers}
           topCrews={topCrews}
+          seasonEntries={seasonLeaderboard}
+          activeSeason={activeSeason}
           currentUserId={profile.id}
           isLoading={isLoadingLeaderboards}
         />

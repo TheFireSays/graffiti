@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { View, Text, Pressable, FlatList, StyleSheet } from "react-native";
-import type { LeaderboardUser, LeaderboardCrew } from "../../stores/profile-store";
+import type { LeaderboardUser, LeaderboardCrew, SeasonLeaderboardEntry, SeasonInfo } from "../../stores/profile-store";
 
 interface LeaderboardsProps {
   topUsers: LeaderboardUser[];
   topCrews: LeaderboardCrew[];
+  seasonEntries: SeasonLeaderboardEntry[];
+  activeSeason: SeasonInfo | null;
   currentUserId: string;
   isLoading: boolean;
 }
 
-type Tab = "taggers" | "crews";
+type Tab = "taggers" | "crews" | "season";
 
-export function Leaderboards({ topUsers, topCrews, currentUserId, isLoading }: LeaderboardsProps) {
+export function Leaderboards({ topUsers, topCrews, seasonEntries, activeSeason, currentUserId, isLoading }: LeaderboardsProps) {
   const [activeTab, setActiveTab] = useState<Tab>("taggers");
 
   if (isLoading) {
@@ -35,6 +37,14 @@ export function Leaderboards({ topUsers, topCrews, currentUserId, isLoading }: L
         >
           <Text style={[styles.tabText, activeTab === "crews" && styles.activeTabText]}>Top Crews</Text>
         </Pressable>
+        {activeSeason && (
+          <Pressable
+            style={[styles.tab, activeTab === "season" && styles.activeTab]}
+            onPress={() => setActiveTab("season")}
+          >
+            <Text style={[styles.tabText, activeTab === "season" && styles.activeTabText]}>Season</Text>
+          </Pressable>
+        )}
       </View>
 
       {activeTab === "taggers" && (
@@ -77,6 +87,28 @@ export function Leaderboards({ topUsers, topCrews, currentUserId, isLoading }: L
             </View>
           )}
           ListEmptyComponent={<Text style={styles.empty}>No crews yet</Text>}
+        />
+      )}
+
+      {activeTab === "season" && activeSeason && (
+        <FlatList
+          data={seasonEntries}
+          keyExtractor={(item) => item.crewId}
+          scrollEnabled={false}
+          renderItem={({ item }) => (
+            <View style={styles.leaderItem}>
+              <Text style={styles.rank}>#{item.rank}</Text>
+              <View style={[styles.crewDot, { backgroundColor: item.crewColor }]} />
+              <View style={styles.leaderInfo}>
+                <Text style={styles.leaderName}>{item.crewName}</Text>
+                <Text style={styles.leaderMeta}>
+                  {item.tagsPlaced} tags · {item.zonesHeld} zones
+                </Text>
+              </View>
+              <Text style={styles.leaderXp}>{item.totalXp.toLocaleString()} XP</Text>
+            </View>
+          )}
+          ListEmptyComponent={<Text style={styles.empty}>No season data yet</Text>}
         />
       )}
     </View>
