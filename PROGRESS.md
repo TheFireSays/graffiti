@@ -10,7 +10,7 @@
 
 - [x] Task 1: Create Expo Project
 - [x] Task 2: Install Core Dependencies
-- [ ] Task 3: Initialize Supabase Local Development
+- [x] Task 3: Initialize Supabase Local Development
 - [ ] Task 4: Database Migration — Enable PostGIS
 - [ ] Task 5: Database Migration — Create Users Table
 - [ ] Task 6: Database Migration — Create Crews and Crew Members Tables
@@ -32,4 +32,4 @@
 
 ## Notes / Errors
 
-_(Claude Code: log any blockers, errors, or decisions here as you work)_
+- Task 3 (2026-03-29): Supabase CLI 2.84.4 used. New CLI version outputs `PUBLISHABLE_KEY` (sb_publishable_...) format in UI but `ANON_KEY` JWT is still present in JSON output and used for `.env.local`. Two services stopped but non-critical: `supabase_imgproxy_graffiti` (image optimization) and `supabase_pooler_graffiti` (connection pooler) — core API, Auth, DB, Realtime, Storage all running.
