@@ -1,10 +1,73 @@
-import { View, Text, StyleSheet } from "react-native";
+import { useEffect, useCallback } from "react";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
+import { useAuthStore } from "../../stores/auth-store";
+import { useCrewStore } from "../../stores/crew-store";
+import { NoCrewView } from "../../components/crew/no-crew-view";
+import { CrewDashboard } from "../../components/crew/crew-dashboard";
 
 export default function CrewScreen() {
+  const profile = useAuthStore((s) => s.profile);
+  const fetchProfile = useAuthStore((s) => s.fetchProfile);
+
+  const crew = useCrewStore((s) => s.crew);
+  const members = useCrewStore((s) => s.members);
+  const invites = useCrewStore((s) => s.invites);
+  const isLoading = useCrewStore((s) => s.isLoading);
+  const loadCrew = useCrewStore((s) => s.loadCrew);
+  const loadMembers = useCrewStore((s) => s.loadMembers);
+  const loadInvites = useCrewStore((s) => s.loadInvites);
+  const clearCrew = useCrewStore((s) => s.clearCrew);
+
+  useEffect(() => {
+    if (profile?.crew_id) {
+      loadCrew(profile.crew_id);
+      loadMembers(profile.crew_id);
+      loadInvites(profile.crew_id);
+    } else {
+      clearCrew();
+    }
+  }, [profile?.crew_id, loadCrew, loadMembers, loadInvites, clearCrew]);
+
+  const userRole = members.find((m) => m.userId === profile?.id)?.role ?? null;
+
+  const handleCrewChanged = useCallback(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
+  if (!profile) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color="#4ecdc4" />
+      </View>
+    );
+  }
+
+  if (isLoading && profile.crew_id) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color="#4ecdc4" />
+      </View>
+    );
+  }
+
+  if (!profile.crew_id || !crew) {
+    return (
+      <View style={styles.container}>
+        <NoCrewView onCrewChanged={handleCrewChanged} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Crew</Text>
-      <Text style={styles.subtitle}>Crew management coming soon</Text>
+      <CrewDashboard
+        crew={crew}
+        members={members}
+        invites={invites}
+        userId={profile.id}
+        userRole={userRole ?? "member"}
+        onLeft={handleCrewChanged}
+      />
     </View>
   );
 }
@@ -13,17 +76,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#1a1a2e",
+    paddingTop: 60,
+  },
+  loading: {
+    flex: 1,
+    backgroundColor: "#1a1a2e",
     alignItems: "center",
     justifyContent: "center",
-  },
-  title: {
-    color: "#4ecdc4",
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  subtitle: {
-    color: "#666",
-    fontSize: 14,
-    marginTop: 8,
   },
 });
