@@ -250,6 +250,18 @@
 
 ---
 
+## Phase 8: Anti-Cheat Foundations (Complete)
+
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-29-15-anti-cheat.md`
+
+- [x] Task 1: Schema migration (00035) — suspicious_activity table, flag_suspicious_activity RPC, device_fingerprint on push_tokens, anti-cheat game constants
+- [x] Task 2: Updated place_tag_scored (00036) — daily limit check, movement speed check, min distance check, suspicious activity logging
+- [x] Task 3: Regenerated database.ts types
+- [x] Task 4: Integration tests — 5 tests for daily limit, speed check, min distance, suspicious activity RPC
+- [x] Task 5: Full verification — 103 tests, 0 type errors, 0 lint errors
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
