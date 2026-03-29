@@ -12,10 +12,14 @@ export default function MapScreen() {
   const isLoading = useMapStore((s) => s.isLoading);
   const selectedTag = useMapStore((s) => s.selectedTag);
   const selectTag = useMapStore((s) => s.selectTag);
+  const subscribeToChanges = useMapStore((s) => s.subscribeToChanges);
+  const unsubscribe = useMapStore((s) => s.unsubscribe);
 
   useEffect(() => {
     loadMapData();
-  }, [loadMapData]);
+    subscribeToChanges();
+    return () => unsubscribe();
+  }, [loadMapData, subscribeToChanges, unsubscribe]);
 
   if (isLoading || locationLoading) {
     return (
