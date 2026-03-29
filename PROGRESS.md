@@ -106,6 +106,19 @@
 
 ---
 
+## Scoring + XP + Zone Control Plan (Complete)
+
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-29-07-scoring-xp-zone-control.md`
+
+- [x] Task 1: game_constants migration (00017)
+- [x] Task 2: place_tag_scored RPC migration (00018)
+- [x] Task 3: zone_control trigger migration (00019)
+- [x] Task 4: tag_decay migration (00020)
+- [x] Task 5: Update client — tag-placement.ts calls place_tag_scored RPC; tag.tsx refreshes auth profile
+- [x] Task 6: E2E verification — db reset clean, RPC returns XP/spray data, lint clean
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
