@@ -65,9 +65,18 @@ jest.mock("@sentry/react-native", () => ({
   withScope: jest.fn((cb) => cb({ setExtra: jest.fn() })),
 }));
 
-// Mock @react-native-async-storage/async-storage
-jest.mock("@react-native-async-storage/async-storage", () => ({
-  getItem: jest.fn().mockResolvedValue(null),
-  setItem: jest.fn().mockResolvedValue(undefined),
-  removeItem: jest.fn().mockResolvedValue(undefined),
-}));
+// Mock @react-native-async-storage/async-storage with in-memory store
+jest.mock("@react-native-async-storage/async-storage", () => {
+  const store = {};
+  return {
+    getItem: jest.fn((key) => Promise.resolve(store[key] ?? null)),
+    setItem: jest.fn((key, value) => {
+      store[key] = value;
+      return Promise.resolve(undefined);
+    }),
+    removeItem: jest.fn((key) => {
+      delete store[key];
+      return Promise.resolve(undefined);
+    }),
+  };
+});

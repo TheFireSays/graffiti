@@ -18,6 +18,11 @@ jest.mock("expo-status-bar", () => ({
   StatusBar: () => null,
 }));
 
+// Mock NetInfo (used by useOfflineSync in _layout)
+jest.mock("@react-native-community/netinfo", () => ({
+  addEventListener: jest.fn(() => jest.fn()),
+}));
+
 // Mock supabase
 jest.mock("@/lib/supabase", () => ({
   supabase: {
@@ -46,9 +51,10 @@ jest.mock("@/lib/supabase", () => ({
 import RootLayout from "@/app/_layout";
 
 describe("RootLayout (Auth Gate)", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks();
-    (AsyncStorage.getItem as jest.Mock).mockResolvedValue("true");
+    // Pre-populate onboarding flag so root layout doesn't hang
+    await AsyncStorage.setItem("hasSeenOnboarding", "true");
   });
 
   it("shows loading indicator when isLoading is true", () => {
@@ -94,9 +100,11 @@ describe("RootLayout (Auth Gate)", () => {
     });
   });
 
-  it("shows loading when AsyncStorage has not resolved yet", () => {
-    // Make AsyncStorage hang
-    (AsyncStorage.getItem as jest.Mock).mockReturnValue(new Promise(() => {}));
+  it("shows loading when AsyncStorage has not resolved yet", async () => {
+    // Make getItem hang for the onboarding key
+    (AsyncStorage.getItem as jest.Mock).mockImplementation(
+      () => new Promise(() => {})
+    );
     useAuthStore.setState({ isLoading: false, session: null });
     const { queryByTestId } = render(<RootLayout />);
 
