@@ -2,60 +2,57 @@ import { supabase } from "./supabase";
 
 interface PlacementRequest {
   userId: string;
-  crewId: string | null;
   tagImageId: string;
   customColors: Record<string, string>;
   latitude: number;
   longitude: number;
   compassHeading: number;
+  goOverTagId?: string;
 }
 
 interface PlacementResult {
   success: boolean;
   error?: string;
   tagId?: string;
+  xpEarned?: number;
+  sprayCost?: number;
+  sprayEarned?: number;
+  newXp?: number;
+  newLevel?: number;
+  newSprayCans?: number;
+  leveledUp?: boolean;
 }
 
 export async function placeTag(req: PlacementRequest): Promise<PlacementResult> {
-  // 1. Check restricted zones
-  const { data: restricted } = await supabase.rpc("check_restricted_zone", {
+  const { data, error } = await supabase.rpc("place_tag_scored", {
+    p_user_id: req.userId,
+    p_tag_image_id: req.tagImageId,
+    p_custom_colors: req.customColors,
     p_lng: req.longitude,
     p_lat: req.latitude,
+    p_compass_heading: req.compassHeading,
+    p_go_over_tag_id: req.goOverTagId ?? null,
   });
 
-  if (restricted && restricted.length > 0) {
-    const zone = restricted[0];
-    return {
-      success: false,
-      error: `Cannot tag near ${zone.zone_name} (${zone.zone_category})`,
-    };
+  if (error) {
+    return { success: false, error: error.message };
   }
 
-  // 2. Find the zone this point falls in
-  const { data: zoneId } = await supabase.rpc("find_zone_for_point", {
-    p_lng: req.longitude,
-    p_lat: req.latitude,
-  });
+  const result = data as any;
 
-  // 3. Insert the tag
-  const { data: tag, error: insertError } = await supabase
-    .from("tags")
-    .insert({
-      user_id: req.userId,
-      crew_id: req.crewId,
-      tag_image_id: req.tagImageId,
-      custom_colors: req.customColors,
-      location: `SRID=4326;POINT(${req.longitude} ${req.latitude})`,
-      compass_heading: req.compassHeading,
-      zone_id: zoneId ?? null,
-      status: "active",
-    })
-    .select("id")
-    .single();
-
-  if (insertError) {
-    return { success: false, error: insertError.message };
+  if (!result.success) {
+    return { success: false, error: result.error };
   }
 
-  return { success: true, tagId: tag.id };
+  return {
+    success: true,
+    tagId: result.tag_id,
+    xpEarned: result.xp_earned,
+    sprayCost: result.spray_cost,
+    sprayEarned: result.spray_earned,
+    newXp: result.new_xp,
+    newLevel: result.new_level,
+    newSprayCans: result.new_spray_cans,
+    leveledUp: result.leveled_up,
+  };
 }

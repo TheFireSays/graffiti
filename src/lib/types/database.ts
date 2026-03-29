@@ -179,6 +179,24 @@ export type Database = {
           },
         ]
       }
+      game_constants: {
+        Row: {
+          description: string | null
+          key: string
+          value: number
+        }
+        Insert: {
+          description?: string | null
+          key: string
+          value: number
+        }
+        Update: {
+          description?: string | null
+          key?: string
+          value?: number
+        }
+        Relationships: []
+      }
       invites: {
         Row: {
           code: string
@@ -519,6 +537,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_level: { Args: { p_xp: number }; Returns: number }
       check_restricted_zone: {
         Args: { p_lat: number; p_lng: number }
         Returns: {
@@ -526,10 +545,12 @@ export type Database = {
           zone_name: string
         }[]
       }
+      decay_expired_tags: { Args: never; Returns: Json }
       find_zone_for_point: {
         Args: { p_lat: number; p_lng: number }
         Returns: string
       }
+      get_constant: { Args: { p_key: string }; Returns: number }
       get_tags_for_map: {
         Args: never
         Returns: {
@@ -559,6 +580,18 @@ export type Database = {
           name: string
           tag_counts: Json
         }[]
+      }
+      place_tag_scored: {
+        Args: {
+          p_compass_heading: number
+          p_custom_colors: Json
+          p_go_over_tag_id?: string
+          p_lat: number
+          p_lng: number
+          p_tag_image_id: string
+          p_user_id: string
+        }
+        Returns: Json
       }
     }
     Enums: {

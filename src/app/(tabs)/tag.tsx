@@ -26,6 +26,7 @@ export default function TagScreen() {
   const reset = useTagStore((s) => s.reset);
 
   const loadMapData = useMapStore((s) => s.loadMapData);
+  const fetchProfile = useAuthStore((s) => s.fetchProfile);
 
   const [showLibrary, setShowLibrary] = useState(false);
 
@@ -43,7 +44,6 @@ export default function TagScreen() {
 
     const result = await placeTag({
       userId: profile.id,
-      crewId: profile.crew_id,
       tagImageId: selectedImage.id,
       customColors,
       latitude: location.latitude,
@@ -56,12 +56,13 @@ export default function TagScreen() {
     if (result.success) {
       setPlacementSuccess(true);
       loadMapData();
+      fetchProfile();
     } else {
       setPlacementError(result.error ?? "Failed to place tag");
     }
   }, [
     location, selectedImage, profile, customColors,
-    setPlacing, setPlacementError, setPlacementSuccess, loadMapData,
+    setPlacing, setPlacementError, setPlacementSuccess, loadMapData, fetchProfile,
   ]);
 
   const handleDismissConfirmation = useCallback(() => {
