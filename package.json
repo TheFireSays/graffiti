@@ -8,6 +8,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "test": "npx jest",
+    "test:coverage": "npx jest --coverage",
     "lint": "expo lint"
   },
   "dependencies": {
@@ -46,10 +48,13 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@testing-library/react-native": "^13.3.3",
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.2.2",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~55.0.0",
     "eslint-plugin-security": "^4.0.0",
+    "jest-expo": "^55.0.11",
     "typescript": "~5.9.2"
   },
   "private": true
