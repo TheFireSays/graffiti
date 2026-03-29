@@ -4,6 +4,8 @@ import { StatusBar } from "expo-status-bar";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { supabase } from "../lib/supabase";
 import { useAuthStore } from "../stores/auth-store";
+import { useNotifications } from "../hooks/use-notifications";
+import { NotificationListener } from "../components/notifications/notification-listener";
 
 export default function RootLayout() {
   const router = useRouter();
@@ -26,6 +28,8 @@ export default function RootLayout() {
 
     return () => subscription.unsubscribe();
   }, [setSession]);
+
+  useNotifications();
 
   useEffect(() => {
     if (isLoading) return;
@@ -60,6 +64,7 @@ export default function RootLayout() {
   return (
     <>
       <StatusBar style="light" />
+      <NotificationListener />
       <Slot />
     </>
   );

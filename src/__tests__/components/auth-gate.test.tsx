@@ -26,6 +26,18 @@ jest.mock("@/lib/supabase", () => ({
         data: { subscription: { unsubscribe: jest.fn() } },
       })),
     },
+    rpc: jest.fn().mockResolvedValue({ data: { success: true }, error: null }),
+    from: jest.fn().mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      order: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockResolvedValue({ data: [], error: null }),
+    }),
+    channel: jest.fn().mockReturnValue({
+      on: jest.fn().mockReturnThis(),
+      subscribe: jest.fn().mockReturnThis(),
+    }),
+    removeChannel: jest.fn(),
   },
 }));
 

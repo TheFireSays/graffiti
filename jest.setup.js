@@ -45,5 +45,14 @@ jest.mock("react-native-maps", () => {
   };
 });
 
+// Mock expo-notifications
+jest.mock("expo-notifications", () => ({
+  getPermissionsAsync: jest.fn().mockResolvedValue({ status: "granted" }),
+  requestPermissionsAsync: jest.fn().mockResolvedValue({ status: "granted" }),
+  getExpoPushTokenAsync: jest.fn().mockResolvedValue({ data: "ExponentPushToken[mock]" }),
+  setNotificationHandler: jest.fn(),
+  addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
+}));
+
 // Mock react-native-url-polyfill
 jest.mock("react-native-url-polyfill/auto", () => {});
