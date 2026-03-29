@@ -1,0 +1,76 @@
+import React from "react";
+import { render } from "@testing-library/react-native";
+import { useAuthStore } from "@/stores/auth-store";
+
+// Mock expo-router — use require inside factory to avoid out-of-scope variable error
+jest.mock("expo-router", () => {
+  const { View } = require("react-native");
+  return {
+    Slot: () => <View testID="slot" />,
+    useRouter: () => ({ replace: jest.fn() }),
+    useSegments: () => [],
+  };
+});
+
+// Mock expo-status-bar
+jest.mock("expo-status-bar", () => ({
+  StatusBar: () => null,
+}));
+
+// Mock supabase
+jest.mock("@/lib/supabase", () => ({
+  supabase: {
+    auth: {
+      getSession: jest.fn().mockResolvedValue({ data: { session: null } }),
+      onAuthStateChange: jest.fn(() => ({
+        data: { subscription: { unsubscribe: jest.fn() } },
+      })),
+    },
+  },
+}));
+
+// Import the component after mocks
+import RootLayout from "@/app/_layout";
+
+describe("RootLayout (Auth Gate)", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("shows loading indicator when isLoading is true", () => {
+    useAuthStore.setState({ isLoading: true, session: null });
+    const { queryByTestId } = render(<RootLayout />);
+
+    // Slot should NOT be present during loading
+    expect(queryByTestId("slot")).toBeNull();
+  });
+
+  it("renders Slot when loading is complete", () => {
+    useAuthStore.setState({ isLoading: false, session: null });
+    const { getByTestId } = render(<RootLayout />);
+
+    expect(getByTestId("slot")).toBeTruthy();
+  });
+
+  it("renders without crashing when session exists", () => {
+    useAuthStore.setState({
+      isLoading: false,
+      session: { user: { id: "u1" }, access_token: "token" } as any,
+      needsOnboarding: false,
+    });
+
+    const { getByTestId } = render(<RootLayout />);
+    expect(getByTestId("slot")).toBeTruthy();
+  });
+
+  it("renders without crashing when onboarding is needed", () => {
+    useAuthStore.setState({
+      isLoading: false,
+      session: { user: { id: "u1" }, access_token: "token" } as any,
+      needsOnboarding: true,
+    });
+
+    const { getByTestId } = render(<RootLayout />);
+    expect(getByTestId("slot")).toBeTruthy();
+  });
+});
