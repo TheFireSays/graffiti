@@ -57,6 +57,14 @@ jest.mock("expo-notifications", () => ({
 // Mock react-native-url-polyfill
 jest.mock("react-native-url-polyfill/auto", () => {});
 
+// Mock @sentry/react-native
+jest.mock("@sentry/react-native", () => ({
+  init: jest.fn(),
+  captureException: jest.fn(),
+  captureMessage: jest.fn(),
+  withScope: jest.fn((cb) => cb({ setExtra: jest.fn() })),
+}));
+
 // Mock @react-native-async-storage/async-storage
 jest.mock("@react-native-async-storage/async-storage", () => ({
   getItem: jest.fn().mockResolvedValue(null),

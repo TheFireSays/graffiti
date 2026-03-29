@@ -10,7 +10,9 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.graffiti.app",
-      "associatedDomains": ["applinks:graffiti.app"],
+      "associatedDomains": [
+        "applinks:graffiti.app"
+      ],
       "infoPlist": {
         "NSCameraUsageDescription": "Graffiti uses your camera to place AR tags on buildings and structures.",
         "NSLocationWhenInUseUsageDescription": "Graffiti uses your location to place and discover tags near you.",
@@ -44,7 +46,10 @@
               "pathPrefix": "/crew"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -64,7 +69,8 @@
         }
       ],
       "expo-sqlite",
-      "expo-secure-store"
+      "expo-secure-store",
+      "@sentry/react-native"
     ]
   }
 }
