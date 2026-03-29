@@ -146,7 +146,7 @@
 
 ---
 
-## Security Hardening Plan (In Progress)
+## Security Hardening Plan (Complete)
 
 **Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-29-10-security-hardening.md`
 
@@ -156,6 +156,31 @@
 - [x] Task 4: Fix crew member_count default 0 (migration 00026)
 - [x] Task 5: Restrict user profile updates to safe fields via RPC (migration 00027)
 - [x] Task 6: Update tests — 75 tests passing, 0 type errors, 0 lint errors
+
+---
+
+## Phase 1: Polish & Docs (Complete)
+
+- [x] Task 1: Update design spec — Edge Functions → Postgres RPCs, organic zones = Phase 2, AR MVP = camera placement
+- [x] Task 2: Write real README.md (tech stack, setup, structure, tests)
+- [x] Task 3: Push to remote (`git push origin dev/scaffolding`)
+
+---
+
+## Phase 2: Notifications System (Complete)
+
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-29-11-notifications.md`
+
+- [x] Task 1: Push tokens migration (00028) — table + register/unregister RPCs
+- [x] Task 2: Notification queue migration (00029) — table + activity_feed trigger
+- [x] Task 3: Regenerate database types
+- [x] Task 4: Notification store (Zustand) — 7 tests
+- [x] Task 5: useNotifications hook — permission request + token registration
+- [x] Task 6: NotificationListener component — realtime subscription
+- [x] Task 7: Wire into app layout
+- [x] Task 8: Enable realtime on notification_queue (migration 00030)
+- [x] Task 9: Integration tests for notification RPCs — 5 tests
+- [x] Task 10: Full verification — 87 tests, 0 type errors, 0 lint errors
 
 ---
 
