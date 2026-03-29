@@ -47,6 +47,24 @@
 
 ---
 
+## Map View Plan (Complete)
+
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-29-03-map-view.md`
+
+- [x] Task 1: User Location Hook
+- [x] Task 2: Geo Query Helpers
+- [x] Task 3: Database Functions for Map Queries
+- [x] Task 4: Map Data Store (Zustand)
+- [x] Task 5: ZonePolygon Component
+- [x] Task 6: TagMarker Component
+- [x] Task 7: TagDetailSheet Component
+- [x] Task 8: GraffitiMapView Component
+- [x] Task 9: Pull-Up Drawer (Nearby / Feed / Missions tabs)
+- [x] Task 10: Map Screen — Wire Everything Together
+- [x] Task 11: E2E Map Verification
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
