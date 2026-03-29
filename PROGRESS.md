@@ -210,6 +210,18 @@
 
 ---
 
+## Phase 5: Settings & Profile Editing (Complete)
+
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-29-14-settings-profile.md`
+
+- [x] Task 1: Delete account RPC (migration 00034) — soft delete with PII cleanup
+- [x] Task 2: Settings screen — notifications toggle, sign out, delete account
+- [x] Task 3: Profile editing — inline display name editing with profanity filter
+- [x] Task 4: Integration tests — 2 tests for delete_account + update_profile
+- [x] Task 5: Full verification — 98 tests, 0 type errors, 0 lint errors
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
