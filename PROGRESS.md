@@ -65,6 +65,21 @@
 
 ---
 
+## AR Camera + Tag Placement Plan (Complete)
+
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-29-04-ar-camera-tag-placement.md`
+
+- [x] Task 1: Tag Placement Store
+- [x] Task 2: Tag Placement Logic + DB Functions
+- [x] Task 3: Camera View Component
+- [x] Task 4: Tag Library Sheet
+- [x] Task 5: Color Picker
+- [x] Task 6: Placement Confirmation
+- [x] Task 7: Tag Screen — Wire Everything Together
+- [x] Task 8: E2E Verification
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
