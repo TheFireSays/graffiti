@@ -99,6 +99,16 @@ Migrations are in `supabase/migrations/` and applied in order by `supabase db re
 - `00017–00020` — Scoring RPCs, zone control trigger, tag decay
 - `00023–00027` — Security hardening (auth.uid() enforcement, transactional crew RPCs, restricted user updates)
 
+## Physical Device Testing
+
+1. Log in to EAS: `npx eas-cli login`
+2. Build a dev client APK: `npx eas-cli build --platform android --profile development`
+3. Download the APK from the EAS build URL
+4. Install on Android device (enable "Install from unknown sources")
+5. Start the dev server: `npx expo start --dev-client`
+6. Open the dev client app on your phone — it will connect to the dev server
+7. Set your dev machine IP in the Expo connection if needed
+
 ## Design spec
 
 Full product design: [`docs/superpowers/specs/2026-03-29-graffiti-app-design.md`](../docs/superpowers/specs/2026-03-29-graffiti-app-design.md)

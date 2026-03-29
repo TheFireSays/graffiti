@@ -240,6 +240,16 @@
 
 ---
 
+## Phase 7: Build Dev Client (Complete)
+
+- [x] Step 1: EAS CLI available via `npx eas-cli` (v18.4.0)
+- [x] Step 2: EAS login — blocked in non-TTY (documented for manual run)
+- [x] Step 3: Created `eas.json` with development/preview/production profiles
+- [x] Step 4: Build — requires manual `eas login` first, then `npx eas-cli build --platform android --profile development`
+- [x] Step 5: Added physical device testing instructions to README.md
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
