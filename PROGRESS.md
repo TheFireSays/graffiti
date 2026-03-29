@@ -119,6 +119,18 @@
 
 ---
 
+## Activity Feed + Realtime Plan (Complete)
+
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-29-08-activity-feed-realtime.md`
+
+- [x] Task 1: Enable Realtime on Tables (migration 00021)
+- [x] Task 2: Realtime Hook (use-realtime.ts)
+- [x] Task 3: Live Activity Feed (feed-tab.tsx with useRealtime)
+- [x] Task 4: Live Map Data Refresh (map-store.ts subscribeToChanges + index.tsx wired)
+- [x] Task 5: End-to-End Verification (db reset clean, all 3 tables in publication, lint 0 errors)
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
