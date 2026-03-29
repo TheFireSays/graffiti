@@ -197,6 +197,19 @@
 
 ---
 
+## Phase 4: Content Moderation (Complete)
+
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-29-13-content-moderation.md`
+
+- [x] Task 1: Profanity filter library (bad-words wrapper) — 3 tests
+- [x] Task 2: Report & moderation RPCs (migration 00033) — report_tag + review_report
+- [x] Task 3: Report button in TagDetailSheet
+- [x] Task 4: Username + crew name profanity validation
+- [x] Task 5: Integration tests for moderation RPCs — 4 tests
+- [x] Task 6: Full verification — 96 tests, 0 type errors, 0 lint errors
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
