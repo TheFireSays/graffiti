@@ -21,6 +21,7 @@ export function TagMarker({ tag, onPress }: TagMarkerProps) {
       }}
       onPress={() => onPress(tag)}
       tracksViewChanges={false}
+      accessibilityLabel={`Tag by ${tag.crewAbbreviation ?? "unknown crew"}`}
     >
       <View style={[styles.marker, { backgroundColor: color }]}>
         <Text style={styles.label}>{label}</Text>

@@ -32,7 +32,7 @@ export function CameraViewWithHUD({
     return (
       <View style={styles.permissionContainer}>
         <Text style={styles.permissionText}>Camera access is needed to place tags</Text>
-        <Pressable style={styles.permissionButton} onPress={requestPermission}>
+        <Pressable style={styles.permissionButton} onPress={requestPermission} accessibilityLabel="Grant camera access" accessibilityRole="button">
           <Text style={styles.permissionButtonText}>Grant Access</Text>
         </Pressable>
       </View>
@@ -57,7 +57,7 @@ export function CameraViewWithHUD({
           <View style={styles.crosshairDot} />
         </View>
         <View style={styles.actionBar}>
-          <Pressable style={styles.libraryButton} onPress={onOpenLibrary}>
+          <Pressable style={styles.libraryButton} onPress={onOpenLibrary} accessibilityLabel={hasSelectedTag ? "Change tag" : "Select tag"} accessibilityRole="button">
             <Text style={styles.libraryButtonText}>
               {hasSelectedTag ? "Change Tag" : "Select Tag"}
             </Text>
@@ -67,6 +67,8 @@ export function CameraViewWithHUD({
               style={[styles.placeButton, isPlacing && styles.placeButtonDisabled]}
               onPress={onPlaceTag}
               disabled={isPlacing || latitude == null}
+              accessibilityLabel={isPlacing ? "Placing tag" : "Place tag here"}
+              accessibilityRole="button"
             >
               <Text style={styles.placeButtonText}>
                 {isPlacing ? "Placing..." : "Place Tag"}
