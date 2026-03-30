@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   View, Text, Pressable, StyleSheet, Alert,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { useCrewStore } from "../../stores/crew-store";
 import { CrewRoster } from "./crew-roster";
 import { CrewInvites } from "./crew-invites";
@@ -28,8 +29,17 @@ export function CrewDashboard({
   const [activeTab, setActiveTab] = useState<Tab>("roster");
   const leaveCrew = useCrewStore((s) => s.leaveCrew);
 
+  const router = useRouter();
+
   const isFounder = userRole === "og";
   const canCreateInvites = isOgEligible;
+
+  const daysSinceTag = crew.lastTaggedAt
+    ? Math.floor((Date.now() - new Date(crew.lastTaggedAt).getTime()) / 86400000)
+    : null;
+  const daysUntilDissolution = daysSinceTag !== null && daysSinceTag >= 25
+    ? Math.max(1, 30 - daysSinceTag)
+    : null;
 
   async function handleLeave() {
     if (isFounder) {
@@ -45,6 +55,18 @@ export function CrewDashboard({
 
   return (
     <View style={styles.container}>
+      {daysUntilDissolution !== null && (
+        <Pressable
+          testID="inactivity-banner"
+          style={styles.inactivityBanner}
+          onPress={() => router.navigate("/(tabs)/")}
+        >
+          <Text style={styles.inactivityText}>
+            Crew inactive — dissolves in {daysUntilDissolution} day{daysUntilDissolution === 1 ? "" : "s"}. Go place a tag!
+          </Text>
+        </Pressable>
+      )}
+
       {/* Header */}
       <View style={styles.header}>
         <View style={[styles.crewBadge, { backgroundColor: crew.color }]}>
@@ -143,4 +165,20 @@ const styles = StyleSheet.create({
   content: { flex: 1 },
   leaveButton: { padding: 16, alignItems: "center" },
   leaveText: { color: "#ff4444", fontSize: 14, fontWeight: "600" },
+  inactivityBanner: {
+    backgroundColor: "rgba(255, 68, 68, 0.15)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 68, 68, 0.4)",
+    borderRadius: 10,
+    marginHorizontal: 16,
+    marginTop: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+  },
+  inactivityText: {
+    color: "#ff6666",
+    fontSize: 13,
+    fontWeight: "600",
+    textAlign: "center",
+  },
 });
