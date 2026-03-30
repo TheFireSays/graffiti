@@ -66,6 +66,7 @@ describe("Crew Join Flow", () => {
         totalXp: 12000,
         zonesControlled: 3,
         createdAt: "2026-01-01T00:00:00Z",
+        lastTaggedAt: null,
       };
 
       useCrewStore.setState({ crew: crewInfo });

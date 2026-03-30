@@ -23,8 +23,8 @@ describe("crew membership RPCs", () => {
         p_message: "I want to join!",
       });
 
-      expect(data.success).toBe(true);
-      expect(data.request_id).toBe("req-abc");
+      expect((data as any).success).toBe(true);
+      expect((data as any).request_id).toBe("req-abc");
     });
 
     it("rejects if user already in a crew", async () => {
@@ -35,11 +35,11 @@ describe("crew membership RPCs", () => {
 
       const { data } = await supabase.rpc("request_join_crew", {
         p_crew_id: "crew-1",
-        p_message: null,
+        p_message: undefined,
       });
 
-      expect(data.success).toBe(false);
-      expect(data.error).toBe("Already in a crew");
+      expect((data as any).success).toBe(false);
+      expect((data as any).error).toBe("Already in a crew");
     });
   });
 
@@ -52,7 +52,7 @@ describe("crew membership RPCs", () => {
         p_approved: true,
       });
 
-      expect(data.success).toBe(true);
+      expect((data as any).success).toBe(true);
     });
 
     it("declines a request", async () => {
@@ -63,7 +63,7 @@ describe("crew membership RPCs", () => {
         p_approved: false,
       });
 
-      expect(data.success).toBe(true);
+      expect((data as any).success).toBe(true);
     });
   });
 
@@ -78,8 +78,8 @@ describe("crew membership RPCs", () => {
         p_target_username: "NOVA",
       });
 
-      expect(data.success).toBe(true);
-      expect(data.invite_id).toBe("inv-abc");
+      expect((data as any).success).toBe(true);
+      expect((data as any).invite_id).toBe("inv-abc");
     });
 
     it("rejects if target user not found", async () => {
@@ -92,7 +92,7 @@ describe("crew membership RPCs", () => {
         p_target_username: "NONEXISTENT",
       });
 
-      expect(data.success).toBe(false);
+      expect((data as any).success).toBe(false);
     });
   });
 
@@ -105,7 +105,7 @@ describe("crew membership RPCs", () => {
         p_accepted: true,
       });
 
-      expect(data.success).toBe(true);
+      expect((data as any).success).toBe(true);
     });
 
     it("rejects an expired invite", async () => {
@@ -119,7 +119,7 @@ describe("crew membership RPCs", () => {
         p_accepted: true,
       });
 
-      expect(data.success).toBe(false);
+      expect((data as any).success).toBe(false);
     });
   });
 
@@ -131,7 +131,7 @@ describe("crew membership RPCs", () => {
         p_request_id: "req-1",
       });
 
-      expect(data.success).toBe(true);
+      expect((data as any).success).toBe(true);
     });
   });
 });

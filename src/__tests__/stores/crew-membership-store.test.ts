@@ -69,7 +69,7 @@ describe("crew membership actions", () => {
       await useCrewStore.getState().requestJoinCrew("crew-1");
       expect(mockRpc).toHaveBeenCalledWith("request_join_crew", {
         p_crew_id: "crew-1",
-        p_message: null,
+        p_message: undefined,
       });
     });
 

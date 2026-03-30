@@ -343,7 +343,7 @@ export const useCrewStore = create<CrewState>((set, get) => ({
   requestJoinCrew: async (crewId, message) => {
     const { data, error } = await supabase.rpc("request_join_crew", {
       p_crew_id: crewId,
-      p_message: message ?? null,
+      p_message: message ?? undefined,
     });
     if (error) return { success: false, error: error.message };
     const result = data as any;

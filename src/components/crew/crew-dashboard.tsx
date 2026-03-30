@@ -112,7 +112,7 @@ export function CrewDashboard({
 
       {/* Content */}
       <View style={styles.content}>
-        {activeTab === "roster" && <CrewRoster members={members} />}
+        {activeTab === "roster" && <CrewRoster members={members} ogEligibleIds={[]} />}
         {activeTab === "invites" && (
           <CrewInvites
             invites={invites}
