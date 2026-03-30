@@ -1,8 +1,10 @@
 import { supabase } from "./supabase";
 
+type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+
 interface AnalyticsEvent {
   event_name: string;
-  event_data: Record<string, unknown>;
+  event_data: Record<string, Json | undefined>;
   session_id: string | null;
   created_at: string;
 }
@@ -33,7 +35,7 @@ export function stopSession(): void {
 
 export function trackEvent(
   name: string,
-  data: Record<string, unknown> = {}
+  data: Record<string, Json | undefined> = {}
 ): void {
   eventQueue.push({
     event_name: name,
