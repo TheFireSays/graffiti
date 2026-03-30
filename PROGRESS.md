@@ -394,6 +394,31 @@
 
 ---
 
+## Session B — Phase 4: Analytics Foundation (Complete — Extended)
+
+**Branch:** `dev/features-b`
+
+- [x] Task 3 (extended): Wired analytics into tab layout (screen_viewed) and missions (mission_completed)
+- [x] Task 5 (extended): Regenerated database types with analytics tables
+- [x] Task 6 (extended): Added 11 analytics tests (8 unit + 3 integration), fixed auth-gate test mock
+- [x] Verification: 202 tests, 0 type errors, 0 lint errors
+
+---
+
+## Session B — Phase 5: Accessibility Pass (Complete)
+
+**Branch:** `dev/features-b`
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-30-accessibility.md`
+
+- [x] Task 1: Accessibility labels on auth screens (sign-in, sign-up, username, welcome carousel)
+- [x] Task 2: Accessibility labels on map markers and camera controls
+- [x] Task 3: Accessibility labels on drawer tabs, crew, profile, settings, missions, tag detail, zone info
+- [x] Task 4: useReducedMotion hook + achievement toast reduced motion support
+- [x] Task 5: 3 accessibility tests for useReducedMotion hook
+- [x] Task 6: Verification — 205 tests, 0 type errors, 0 lint errors
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
