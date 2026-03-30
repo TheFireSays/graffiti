@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,8 @@ import {
 import { supabase } from "../../lib/supabase";
 import { useAuthStore } from "../../stores/auth-store";
 import { containsProfanity } from "../../lib/profanity";
+import { useDebouncedUsernameCheck } from "../../lib/username-availability";
+import { generateUsernameOptions } from "../../lib/username-generator";
 
 export default function UsernameScreen() {
   const user = useAuthStore((s) => s.user);
@@ -21,6 +23,24 @@ export default function UsernameScreen() {
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+
+  const usernameStatus = useDebouncedUsernameCheck(username);
+
+  const handleUsernameChange = useCallback((text: string) => {
+    setUsername(text);
+    setError("");
+  }, []);
+
+  function handleSuggestionTap(suggestion: string) {
+    setUsername(suggestion);
+    setError("");
+  }
+
+  function handleGenerateSuggestions() {
+    const options = generateUsernameOptions(3);
+    setSuggestions(options);
+  }
 
   async function handleSubmit() {
     const trimmed = username.trim();
@@ -42,6 +62,11 @@ export default function UsernameScreen() {
 
     if (containsProfanity(trimmed)) {
       setError("That username is not allowed.");
+      return;
+    }
+
+    if (usernameStatus.available === false) {
+      setError(usernameStatus.reason ?? "Username is already taken.");
       return;
     }
 
@@ -99,20 +124,42 @@ export default function UsernameScreen() {
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <TextInput
-          style={styles.input}
-          placeholder="Username"
-          placeholderTextColor="#666"
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-          autoCorrect={false}
-          maxLength={20}
-        />
+        <View style={styles.inputRow}>
+          <TextInput
+            style={[styles.input, styles.inputFlex]}
+            placeholder="Username"
+            placeholderTextColor="#666"
+            value={username}
+            onChangeText={handleUsernameChange}
+            autoCapitalize="none"
+            autoCorrect={false}
+            maxLength={20}
+          />
+          <UsernameStatusIndicator status={usernameStatus} />
+        </View>
 
         <Text style={styles.hint}>
           3-20 characters. Letters, numbers, and underscores only.
         </Text>
+
+        {/* Suggestions */}
+        <Pressable style={styles.suggestButton} onPress={handleGenerateSuggestions}>
+          <Text style={styles.suggestText}>Suggest usernames</Text>
+        </Pressable>
+
+        {suggestions.length > 0 ? (
+          <View style={styles.suggestionsRow}>
+            {suggestions.map((s) => (
+              <Pressable
+                key={s}
+                style={styles.chip}
+                onPress={() => handleSuggestionTap(s)}
+              >
+                <Text style={styles.chipText}>{s}</Text>
+              </Pressable>
+            ))}
+          </View>
+        ) : null}
 
         <Pressable
           style={[styles.button, loading && styles.buttonDisabled]}
@@ -128,6 +175,42 @@ export default function UsernameScreen() {
       </View>
     </KeyboardAvoidingView>
   );
+}
+
+function UsernameStatusIndicator({
+  status,
+}: {
+  status: { checking: boolean; available: boolean | null; reason: string | undefined };
+}) {
+  if (status.available === null && !status.checking) return null;
+
+  if (status.checking) {
+    return (
+      <View style={styles.statusContainer}>
+        <ActivityIndicator size="small" color="#4ecdc4" />
+      </View>
+    );
+  }
+
+  if (status.available === true) {
+    return (
+      <View style={styles.statusContainer}>
+        <Text style={styles.statusAvailable}>{"\u2713"} Available</Text>
+      </View>
+    );
+  }
+
+  if (status.available === false) {
+    return (
+      <View style={styles.statusContainer}>
+        <Text style={styles.statusTaken}>
+          {"\u2717"} {status.reason ?? "Taken"}
+        </Text>
+      </View>
+    );
+  }
+
+  return null;
 }
 
 const styles = StyleSheet.create({
@@ -162,6 +245,14 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
   },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  inputFlex: {
+    flex: 1,
+  },
   input: {
     backgroundColor: "#2a2a4a",
     color: "#fff",
@@ -173,10 +264,53 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "bold",
   },
+  statusContainer: {
+    minWidth: 90,
+    alignItems: "center",
+  },
+  statusAvailable: {
+    color: "#00C851",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  statusTaken: {
+    color: "#ff4444",
+    fontSize: 13,
+    fontWeight: "600",
+  },
   hint: {
     color: "#666",
     fontSize: 12,
     textAlign: "center",
+  },
+  suggestButton: {
+    alignSelf: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  suggestText: {
+    color: "#4ecdc4",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  suggestionsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    justifyContent: "center",
+  },
+  chip: {
+    backgroundColor: "#2a2a4a",
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: "#4ecdc4",
+  },
+  chipText: {
+    color: "#4ecdc4",
+    fontSize: 14,
+    fontWeight: "600",
   },
   button: {
     backgroundColor: "#4ecdc4",

@@ -65,6 +65,57 @@ jest.mock("@sentry/react-native", () => ({
   withScope: jest.fn((cb) => cb({ setExtra: jest.fn() })),
 }));
 
+// Mock expo-web-browser
+jest.mock("expo-web-browser", () => ({
+  openAuthSessionAsync: jest.fn().mockResolvedValue({ type: "cancel" }),
+  maybeCompleteAuthSession: jest.fn(),
+}));
+
+// Mock expo-apple-authentication
+jest.mock("expo-apple-authentication", () => ({
+  signInAsync: jest.fn().mockResolvedValue({
+    identityToken: "mock-apple-identity-token",
+    fullName: { givenName: "Test", familyName: "User" },
+    email: "test@apple.com",
+  }),
+  AppleAuthenticationScope: {
+    FULL_NAME: 0,
+    EMAIL: 1,
+  },
+}));
+
+// Mock expo-crypto
+jest.mock("expo-crypto", () => ({
+  randomUUID: jest.fn(() => "mock-uuid-1234"),
+  digestStringAsync: jest.fn().mockResolvedValue("mock-hashed-nonce"),
+  CryptoDigestAlgorithm: {
+    SHA256: "SHA-256",
+  },
+}));
+
+// Mock expo-auth-session
+jest.mock("expo-auth-session", () => ({
+  makeRedirectUri: jest.fn(() => "graffiti://auth/callback"),
+}));
+
+// Mock expo-linking
+jest.mock("expo-linking", () => ({
+  useURL: jest.fn(() => null),
+  createURL: jest.fn((path) => `graffiti://${path}`),
+}));
+
+// Mock expo-router
+jest.mock("expo-router", () => ({
+  useRouter: jest.fn(() => ({
+    replace: jest.fn(),
+    push: jest.fn(),
+    back: jest.fn(),
+  })),
+  useSegments: jest.fn(() => []),
+  Link: "Link",
+  Slot: "Slot",
+}));
+
 // Mock @react-native-async-storage/async-storage with in-memory store
 jest.mock("@react-native-async-storage/async-storage", () => {
   const store = {};

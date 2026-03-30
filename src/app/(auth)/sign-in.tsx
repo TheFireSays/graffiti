@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import { Link } from "expo-router";
 import { supabase } from "../../lib/supabase";
+import { SocialLoginButtons } from "../../components/auth/social-login-buttons";
+import { BiometricLogin } from "../../components/auth/biometric-login";
 
 export default function SignInScreen() {
   const [email, setEmail] = useState("");
@@ -71,6 +73,12 @@ export default function SignInScreen() {
           textContentType="password"
         />
 
+        <Link href="/(auth)/forgot-password" asChild>
+          <Pressable style={styles.forgotButton}>
+            <Text style={styles.forgotText}>Forgot password?</Text>
+          </Pressable>
+        </Link>
+
         <Pressable
           style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleSignIn}
@@ -83,10 +91,15 @@ export default function SignInScreen() {
           )}
         </Pressable>
 
+        <BiometricLogin />
+
+        <SocialLoginButtons />
+
         <Link href="/(auth)/sign-up" asChild>
           <Pressable style={styles.linkButton}>
             <Text style={styles.linkText}>
-              Don&apos;t have an account? <Text style={styles.linkBold}>Sign Up</Text>
+              Don&apos;t have an account?{" "}
+              <Text style={styles.linkBold}>Sign Up</Text>
             </Text>
           </Pressable>
         </Link>
@@ -135,6 +148,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 1,
     borderColor: "#3a3a5a",
+  },
+  forgotButton: {
+    alignSelf: "flex-end",
+    marginTop: -8,
+  },
+  forgotText: {
+    color: "#999",
+    fontSize: 13,
   },
   button: {
     backgroundColor: "#4ecdc4",

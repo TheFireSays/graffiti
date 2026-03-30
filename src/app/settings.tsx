@@ -15,6 +15,9 @@ import { supabase } from "../lib/supabase";
 import { useAuthStore } from "../stores/auth-store";
 import { containsProfanity } from "../lib/profanity";
 import { DEMO_MODE } from "../lib/config";
+import { PasswordStrengthMeter } from "../components/auth/password-strength-meter";
+import { getPasswordStrength } from "../lib/password-validation";
+import { BiometricToggle } from "../components/auth/biometric-login";
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -28,6 +31,14 @@ export default function SettingsScreen() {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  // Change password state
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
 
   async function handleSave() {
     const trimmedUsername = username.trim();
@@ -83,6 +94,48 @@ export default function SettingsScreen() {
     setSuccess("Profile updated!");
   }
 
+  async function handleChangePassword() {
+    setPasswordError("");
+    setPasswordSuccess("");
+
+    const strength = getPasswordStrength(newPassword);
+    if (strength !== "fair" && strength !== "strong") {
+      setPasswordError("Password must be at least fair strength.");
+      return;
+    }
+
+    // eslint-disable-next-line security/detect-possible-timing-attacks -- user-facing validation
+    if (newPassword !== confirmNewPassword) {
+      setPasswordError("Passwords don't match.");
+      return;
+    }
+
+    setChangingPassword(true);
+
+    if (DEMO_MODE) {
+      await new Promise((r) => setTimeout(r, 400));
+      setChangingPassword(false);
+      setPasswordSuccess("Password updated! (demo mode)");
+      setNewPassword("");
+      setConfirmNewPassword("");
+      return;
+    }
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    setChangingPassword(false);
+
+    if (updateError) {
+      setPasswordError(updateError.message);
+    } else {
+      setPasswordSuccess("Password updated successfully!");
+      setNewPassword("");
+      setConfirmNewPassword("");
+    }
+  }
+
   function handleDeleteAccount() {
     if (DEMO_MODE) {
       const msg = "Account deletion is disabled in demo mode.";
@@ -118,6 +171,10 @@ export default function SettingsScreen() {
       ]
     );
   }
+
+  const passwordStrength = newPassword ? getPasswordStrength(newPassword) : null;
+  const isPasswordStrongEnough =
+    passwordStrength === "fair" || passwordStrength === "strong";
 
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
@@ -170,6 +227,82 @@ export default function SettingsScreen() {
 
       {/* Account Section */}
       <Text style={[styles.sectionTitle, styles.sectionTitleSpaced]}>Account</Text>
+
+      {/* Change Password */}
+      {!showChangePassword ? (
+        <Pressable
+          style={styles.actionButton}
+          onPress={() => setShowChangePassword(true)}
+        >
+          <Text style={styles.actionText}>Change Password</Text>
+        </Pressable>
+      ) : (
+        <View style={styles.changePasswordSection}>
+          <Text style={styles.label}>New Password</Text>
+          <TextInput
+            style={styles.input}
+            value={newPassword}
+            onChangeText={setNewPassword}
+            secureTextEntry
+            placeholderTextColor="#666"
+            placeholder="New password"
+            textContentType="newPassword"
+          />
+
+          <PasswordStrengthMeter password={newPassword} />
+
+          <Text style={styles.label}>Confirm New Password</Text>
+          <TextInput
+            style={styles.input}
+            value={confirmNewPassword}
+            onChangeText={setConfirmNewPassword}
+            secureTextEntry
+            placeholderTextColor="#666"
+            placeholder="Confirm new password"
+            textContentType="newPassword"
+          />
+
+          {passwordError ? (
+            <Text style={styles.error}>{passwordError}</Text>
+          ) : null}
+          {passwordSuccess ? (
+            <Text style={styles.success}>{passwordSuccess}</Text>
+          ) : null}
+
+          <View style={styles.changePasswordButtons}>
+            <Pressable
+              style={[
+                styles.saveButton,
+                (changingPassword || !isPasswordStrongEnough) &&
+                  styles.buttonDisabled,
+              ]}
+              onPress={handleChangePassword}
+              disabled={changingPassword || !isPasswordStrongEnough}
+            >
+              {changingPassword ? (
+                <ActivityIndicator color="#1a1a2e" />
+              ) : (
+                <Text style={styles.saveButtonText}>Update Password</Text>
+              )}
+            </Pressable>
+            <Pressable
+              style={styles.cancelButton}
+              onPress={() => {
+                setShowChangePassword(false);
+                setNewPassword("");
+                setConfirmNewPassword("");
+                setPasswordError("");
+                setPasswordSuccess("");
+              }}
+            >
+              <Text style={styles.cancelText}>Cancel</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+
+      {/* Biometric Toggle */}
+      <BiometricToggle />
 
       <Pressable style={styles.actionButton} onPress={signOut}>
         <Text style={styles.actionText}>Sign Out</Text>
@@ -257,4 +390,24 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,68,68,0.3)",
   },
   dangerText: { color: "#ff4444", fontSize: 14, fontWeight: "600" },
+  changePasswordSection: {
+    gap: 8,
+    backgroundColor: "rgba(42, 42, 74, 0.5)",
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 8,
+  },
+  changePasswordButtons: {
+    gap: 8,
+    marginTop: 8,
+  },
+  cancelButton: {
+    padding: 12,
+    alignItems: "center",
+  },
+  cancelText: {
+    color: "#999",
+    fontSize: 14,
+    fontWeight: "600",
+  },
 });

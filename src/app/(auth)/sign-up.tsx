@@ -8,9 +8,13 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from "react-native";
 import { Link } from "expo-router";
 import { supabase } from "../../lib/supabase";
+import { PasswordStrengthMeter } from "../../components/auth/password-strength-meter";
+import { SocialLoginButtons } from "../../components/auth/social-login-buttons";
+import { getPasswordStrength } from "../../lib/password-validation";
 
 export default function SignUpScreen() {
   const [email, setEmail] = useState("");
@@ -19,14 +23,17 @@ export default function SignUpScreen() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const strength = password ? getPasswordStrength(password) : null;
+  const isPasswordStrongEnough = strength === "fair" || strength === "strong";
+
   async function handleSignUp() {
     if (!email || !password) {
       setError("Email and password are required.");
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    if (!isPasswordStrongEnough) {
+      setError("Password must be at least fair strength.");
       return;
     }
 
@@ -56,63 +63,83 @@ export default function SignUpScreen() {
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <View style={styles.inner}>
-        <Text style={styles.title}>Graffiti</Text>
-        <Text style={styles.subtitle}>Create your account</Text>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.inner}>
+          <Text style={styles.title}>Graffiti</Text>
+          <Text style={styles.subtitle}>Create your account</Text>
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+          {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#666"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          textContentType="emailAddress"
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            placeholderTextColor="#666"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            textContentType="emailAddress"
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#666"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          textContentType="newPassword"
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            placeholderTextColor="#666"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            textContentType="newPassword"
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Confirm Password"
-          placeholderTextColor="#666"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          secureTextEntry
-          textContentType="newPassword"
-        />
+          <PasswordStrengthMeter password={password} />
 
-        <Pressable
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleSignUp}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#1a1a2e" />
-          ) : (
-            <Text style={styles.buttonText}>Create Account</Text>
-          )}
-        </Pressable>
+          <TextInput
+            style={styles.input}
+            placeholder="Confirm Password"
+            placeholderTextColor="#666"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry
+            textContentType="newPassword"
+          />
 
-        <Link href="/(auth)/sign-in" asChild>
-          <Pressable style={styles.linkButton}>
-            <Text style={styles.linkText}>
-              Already have an account? <Text style={styles.linkBold}>Sign In</Text>
-            </Text>
+          <Pressable
+            style={[
+              styles.button,
+              (loading || !isPasswordStrongEnough) && styles.buttonDisabled,
+            ]}
+            onPress={handleSignUp}
+            disabled={loading || !isPasswordStrongEnough}
+          >
+            {loading ? (
+              <ActivityIndicator color="#1a1a2e" />
+            ) : (
+              <Text style={styles.buttonText}>Create Account</Text>
+            )}
           </Pressable>
-        </Link>
-      </View>
+
+          {/* Divider for future social buttons */}
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <SocialLoginButtons />
+
+          <Link href="/(auth)/sign-in" asChild>
+            <Pressable style={styles.linkButton}>
+              <Text style={styles.linkText}>
+                Already have an account?{" "}
+                <Text style={styles.linkBold}>Sign In</Text>
+              </Text>
+            </Pressable>
+          </Link>
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -121,6 +148,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#1a1a2e",
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   inner: {
     flex: 1,
@@ -172,6 +202,21 @@ const styles = StyleSheet.create({
     color: "#1a1a2e",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 8,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#3a3a5a",
+  },
+  dividerText: {
+    color: "#666",
+    fontSize: 14,
+    marginHorizontal: 16,
   },
   linkButton: {
     padding: 12,

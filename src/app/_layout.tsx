@@ -24,6 +24,7 @@ export default function RootLayout() {
   const session = useAuthStore((s) => s.session);
   const isLoading = useAuthStore((s) => s.isLoading);
   const needsOnboarding = useAuthStore((s) => s.needsOnboarding);
+  const isEmailVerified = useAuthStore((s) => s.isEmailVerified);
   const setSession = useAuthStore((s) => s.setSession);
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
 
@@ -63,6 +64,7 @@ export default function RootLayout() {
     const inOnboardingGroup = segments[0] === "(onboarding)";
 
     if (!session) {
+      // Not signed in
       if (!inAuthGroup) {
         if (!hasSeenOnboarding) {
           router.replace("/(auth)/welcome");
@@ -70,16 +72,24 @@ export default function RootLayout() {
           router.replace("/(auth)/sign-in");
         }
       }
+    } else if (!isEmailVerified && !isSocialLogin(session)) {
+      // Signed in but email not verified (email/password signup only)
+      const allSegments = segments as string[];
+      if (allSegments[1] !== "verify-email" && !inOnboardingGroup) {
+        router.replace("/(auth)/verify-email");
+      }
     } else if (needsOnboarding) {
+      // Email verified, needs onboarding — route to getting-started
       if (!inOnboardingGroup) {
-        router.replace("/(onboarding)/username");
+        router.replace("/(onboarding)/getting-started");
       }
     } else {
+      // Fully authenticated and onboarded
       if (inAuthGroup || inOnboardingGroup) {
         router.replace("/(tabs)");
       }
     }
-  }, [session, isLoading, needsOnboarding, hasSeenOnboarding, segments, router]);
+  }, [session, isLoading, needsOnboarding, isEmailVerified, hasSeenOnboarding, segments, router]);
 
   if (isLoading || hasSeenOnboarding === null) {
     return (
@@ -98,6 +108,15 @@ export default function RootLayout() {
       <SyncToast />
     </ErrorBoundary>
   );
+}
+
+/**
+ * Detect if the current session is from a social/OAuth login
+ * (Google, Apple, Facebook) rather than email/password signup.
+ */
+function isSocialLogin(session: { user?: { app_metadata?: Record<string, unknown> } } | null): boolean {
+  const provider = session?.user?.app_metadata?.provider;
+  return typeof provider === "string" && provider !== "email";
 }
 
 const styles = StyleSheet.create({
