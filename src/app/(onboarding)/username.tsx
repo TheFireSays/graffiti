@@ -108,6 +108,8 @@ export default function UsernameScreen() {
           autoCapitalize="none"
           autoCorrect={false}
           maxLength={20}
+          accessibilityLabel="Username"
+          accessibilityHint="3 to 20 characters, letters, numbers, and underscores only"
         />
 
         <Text style={styles.hint}>
@@ -118,6 +120,8 @@ export default function UsernameScreen() {
           style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleSubmit}
           disabled={loading}
+          accessibilityLabel={loading ? "Claiming username" : "Claim username"}
+          accessibilityRole="button"
         >
           {loading ? (
             <ActivityIndicator color="#1a1a2e" />

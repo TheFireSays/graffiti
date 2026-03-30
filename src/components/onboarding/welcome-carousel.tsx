@@ -93,6 +93,8 @@ export function WelcomeCarousel({ onComplete }: WelcomeCarouselProps) {
         style={styles.skipButton}
         onPress={onComplete}
         testID="skip-button"
+        accessibilityLabel="Skip onboarding"
+        accessibilityRole="button"
       >
         <Text style={styles.skipText}>Skip</Text>
       </Pressable>
@@ -124,6 +126,8 @@ export function WelcomeCarousel({ onComplete }: WelcomeCarouselProps) {
           ]}
           onPress={handleNext}
           testID={isLastSlide ? "get-started-button" : "next-button"}
+          accessibilityLabel={isLastSlide ? "Get started" : "Next slide"}
+          accessibilityRole="button"
         >
           <Text style={styles.nextText}>
             {isLastSlide ? "Get Started" : "Next"}

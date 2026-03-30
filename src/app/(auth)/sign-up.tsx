@@ -71,6 +71,7 @@ export default function SignUpScreen() {
           autoCapitalize="none"
           keyboardType="email-address"
           textContentType="emailAddress"
+          accessibilityLabel="Email address"
         />
 
         <TextInput
@@ -81,6 +82,7 @@ export default function SignUpScreen() {
           onChangeText={setPassword}
           secureTextEntry
           textContentType="newPassword"
+          accessibilityLabel="Password"
         />
 
         <TextInput
@@ -91,12 +93,15 @@ export default function SignUpScreen() {
           onChangeText={setConfirmPassword}
           secureTextEntry
           textContentType="newPassword"
+          accessibilityLabel="Confirm password"
         />
 
         <Pressable
           style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleSignUp}
           disabled={loading}
+          accessibilityLabel={loading ? "Creating account" : "Create account"}
+          accessibilityRole="button"
         >
           {loading ? (
             <ActivityIndicator color="#1a1a2e" />
@@ -106,7 +111,11 @@ export default function SignUpScreen() {
         </Pressable>
 
         <Link href="/(auth)/sign-in" asChild>
-          <Pressable style={styles.linkButton}>
+          <Pressable
+            style={styles.linkButton}
+            accessibilityLabel="Go to sign in"
+            accessibilityRole="link"
+          >
             <Text style={styles.linkText}>
               Already have an account? <Text style={styles.linkBold}>Sign In</Text>
             </Text>
