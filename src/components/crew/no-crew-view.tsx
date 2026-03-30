@@ -4,6 +4,7 @@ import { CreateCrewForm } from "./create-crew-form";
 import { JoinCrewForm } from "./join-crew-form";
 import { PendingMemberships } from "./pending-memberships";
 import { useCrewStore } from "../../stores/crew-store";
+import { useUserMembershipRealtime } from "../../hooks/use-crew-realtime";
 
 interface NoCrewViewProps {
   onCrewChanged: () => void;
@@ -13,6 +14,8 @@ interface NoCrewViewProps {
 type Screen = "choose" | "create" | "join";
 
 export function NoCrewView({ onCrewChanged, userId }: NoCrewViewProps) {
+  useUserMembershipRealtime(userId);
+
   const [screen, setScreen] = useState<Screen>("choose");
 
   const pendingIncomingInvites = useCrewStore((s) => s.pendingIncomingInvites);

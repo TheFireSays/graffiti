@@ -921,6 +921,18 @@ export type Database = {
       }
       get_active_season: { Args: never; Returns: Json }
       get_constant: { Args: { p_key: string }; Returns: number }
+      get_crew_activity_scores: {
+        Args: { p_crew_id: string }
+        Returns: {
+          user_id: string
+          username: string
+          xp_earned: number
+          tags_placed: number
+          composite_score: number
+          rank: number
+          is_og_eligible: boolean
+        }[]
+      }
       get_og_eligible_members: {
         Args: { p_crew_id: string }
         Returns: string[]

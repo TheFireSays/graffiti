@@ -4,11 +4,15 @@ import { CrewDashboard } from "@/components/crew/crew-dashboard";
 
 jest.mock("@/stores/crew-store", () => ({
   useCrewStore: (selector: any) =>
-    selector({ leaveCrew: jest.fn() }),
+    selector({ leaveCrew: jest.fn(), activityScores: [] }),
 }));
 
 jest.mock("expo-router", () => ({
   useRouter: () => ({ navigate: jest.fn() }),
+}));
+
+jest.mock("@/hooks/use-crew-realtime", () => ({
+  useCrewRealtime: jest.fn(),
 }));
 
 const baseCrew = {
@@ -31,6 +35,8 @@ const baseProps = {
   userId: "user-1",
   userRole: "og",
   isOgEligible: true,
+  ogEligibleIds: ["user-1"],
+  activityScores: [],
   onLeft: jest.fn(),
 };
 

@@ -166,6 +166,14 @@ export const mockTagHistory = [
   { id: "t7", tag_image_name: "Classic Tag", zone_name: "6th Street", created_at: "2026-03-29T15:00:00Z" },
 ];
 
+export const mockActivityScores = [
+  { userId: mockUser.id, username: "KRUSH", xpEarned: 2400, tagsPlaced: 12, compositeScore: 2520, rank: 1, isOgEligible: true },
+  { userId: "a1000000-0000-0000-0000-000000000003", username: "BLAZE", xpEarned: 3800, tagsPlaced: 5, compositeScore: 3850, rank: 1, isOgEligible: true },
+  { userId: "a1000000-0000-0000-0000-000000000002", username: "VENOM", xpEarned: 1200, tagsPlaced: 8, compositeScore: 1280, rank: 2, isOgEligible: true },
+  { userId: "a1000000-0000-0000-0000-000000000004", username: "NOVA", xpEarned: 800, tagsPlaced: 3, compositeScore: 830, rank: 3, isOgEligible: false },
+  { userId: "a1000000-0000-0000-0000-000000000006", username: "PHANTOM", xpEarned: 600, tagsPlaced: 1, compositeScore: 610, rank: 4, isOgEligible: false },
+];
+
 export const mockTagImages = [
   { id: "img1", name: "Classic Tag", image_url: null, preview_color: "#FF4136" },
   { id: "img2", name: "Throw-up", image_url: null, preview_color: "#0074D9" },

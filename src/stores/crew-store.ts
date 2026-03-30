@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { supabase } from "../lib/supabase";
 import { DEMO_MODE } from "../lib/config";
-import { mockCrew, mockCrewMembers } from "../lib/mock-data";
+import { mockCrew, mockCrewMembers, mockActivityScores } from "../lib/mock-data";
 
 interface CrewMember {
   userId: string;
@@ -76,6 +76,16 @@ interface PendingOutgoingRequest {
   createdAt: string;
 }
 
+interface ActivityScore {
+  userId: string;
+  username: string;
+  xpEarned: number;
+  tagsPlaced: number;
+  compositeScore: number;
+  rank: number;
+  isOgEligible: boolean;
+}
+
 interface CrewState {
   crew: CrewInfo | null;
   members: CrewMember[];
@@ -84,6 +94,8 @@ interface CrewState {
   directInvites: DirectInvite[];
   pendingIncomingInvites: PendingIncomingInvite[];
   pendingOutgoingRequests: PendingOutgoingRequest[];
+  ogEligibleIds: string[];
+  activityScores: ActivityScore[];
   userRole: string | null;
   isLoading: boolean;
   error: string | null;
@@ -91,6 +103,8 @@ interface CrewState {
   loadCrew: (crewId: string) => Promise<void>;
   loadMembers: (crewId: string) => Promise<void>;
   loadInvites: (crewId: string) => Promise<void>;
+  fetchOgEligible: (crewId: string) => Promise<void>;
+  fetchActivityScores: (crewId: string) => Promise<void>;
   createCrew: (name: string, abbreviation: string, color: string) => Promise<{ success: boolean; error?: string }>;
   joinCrew: (inviteCode: string) => Promise<{ success: boolean; error?: string }>;
   createInvite: (crewId: string, userId: string, maxUses: number) => Promise<{ success: boolean; code?: string; error?: string }>;
@@ -106,7 +120,7 @@ interface CrewState {
   loadPendingMemberships: (userId: string) => Promise<void>;
 }
 
-export type { CrewInfo, CrewMember, CrewInvite, JoinRequest, DirectInvite, PendingIncomingInvite, PendingOutgoingRequest };
+export type { CrewInfo, CrewMember, CrewInvite, JoinRequest, DirectInvite, PendingIncomingInvite, PendingOutgoingRequest, ActivityScore };
 
 export const useCrewStore = create<CrewState>((set, get) => ({
   crew: null,
@@ -116,6 +130,8 @@ export const useCrewStore = create<CrewState>((set, get) => ({
   directInvites: [],
   pendingIncomingInvites: [],
   pendingOutgoingRequests: [],
+  ogEligibleIds: [],
+  activityScores: [],
   userRole: null,
   isLoading: false,
   error: null,
@@ -207,6 +223,50 @@ export const useCrewStore = create<CrewState>((set, get) => ({
           level: row.user?.level ?? 1,
           xp: row.user?.xp ?? 0,
           joinedAt: row.joined_at,
+        })),
+      });
+    }
+  },
+
+  fetchOgEligible: async (crewId) => {
+    if (DEMO_MODE) {
+      set({
+        ogEligibleIds: mockActivityScores
+          .filter((s) => s.isOgEligible)
+          .map((s) => s.userId),
+      });
+      return;
+    }
+
+    const { data, error } = await supabase.rpc("get_og_eligible_members", {
+      p_crew_id: crewId,
+    });
+
+    if (!error && data) {
+      set({ ogEligibleIds: data as string[] });
+    }
+  },
+
+  fetchActivityScores: async (crewId) => {
+    if (DEMO_MODE) {
+      set({ activityScores: mockActivityScores });
+      return;
+    }
+
+    const { data, error } = await supabase.rpc("get_crew_activity_scores", {
+      p_crew_id: crewId,
+    });
+
+    if (!error && data) {
+      set({
+        activityScores: (data as any[]).map((row) => ({
+          userId: row.user_id,
+          username: row.username,
+          xpEarned: Number(row.xp_earned),
+          tagsPlaced: Number(row.tags_placed),
+          compositeScore: Number(row.composite_score),
+          rank: row.rank,
+          isOgEligible: row.is_og_eligible,
         })),
       });
     }
@@ -322,7 +382,7 @@ export const useCrewStore = create<CrewState>((set, get) => ({
       return { success: false, error: result.error };
     }
 
-    set({ crew: null, members: [], invites: [], userRole: null });
+    set({ crew: null, members: [], invites: [], ogEligibleIds: [], activityScores: [], userRole: null });
     return { success: true };
   },
 
@@ -335,6 +395,8 @@ export const useCrewStore = create<CrewState>((set, get) => ({
       directInvites: [],
       pendingIncomingInvites: [],
       pendingOutgoingRequests: [],
+      ogEligibleIds: [],
+      activityScores: [],
       userRole: null,
       error: null,
     });

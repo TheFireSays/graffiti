@@ -4,10 +4,11 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useCrewStore } from "../../stores/crew-store";
+import { useCrewRealtime } from "../../hooks/use-crew-realtime";
 import { CrewRoster } from "./crew-roster";
 import { CrewInvites } from "./crew-invites";
 import { CrewRequestsTab } from "./crew-requests-tab";
-import type { CrewInfo, CrewMember, CrewInvite, JoinRequest, DirectInvite } from "../../stores/crew-store";
+import type { CrewInfo, CrewMember, CrewInvite, JoinRequest, DirectInvite, ActivityScore } from "../../stores/crew-store";
 
 interface CrewDashboardProps {
   crew: CrewInfo;
@@ -18,14 +19,18 @@ interface CrewDashboardProps {
   userId: string;
   userRole: string;
   isOgEligible: boolean;
+  ogEligibleIds: string[];
+  activityScores: ActivityScore[];
   onLeft: () => void;
 }
 
 type Tab = "roster" | "invites" | "requests";
 
 export function CrewDashboard({
-  crew, members, invites, joinRequests, directInvites, userId, userRole, isOgEligible, onLeft,
+  crew, members, invites, joinRequests, directInvites, userId, userRole, isOgEligible, ogEligibleIds, activityScores, onLeft,
 }: CrewDashboardProps) {
+  useCrewRealtime(crew.id);
+
   const [activeTab, setActiveTab] = useState<Tab>("roster");
   const leaveCrew = useCrewStore((s) => s.leaveCrew);
 
@@ -112,7 +117,7 @@ export function CrewDashboard({
 
       {/* Content */}
       <View style={styles.content}>
-        {activeTab === "roster" && <CrewRoster members={members} ogEligibleIds={[]} />}
+        {activeTab === "roster" && <CrewRoster members={members} ogEligibleIds={ogEligibleIds} activityScores={activityScores} />}
         {activeTab === "invites" && (
           <CrewInvites
             invites={invites}
