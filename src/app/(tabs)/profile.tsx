@@ -11,6 +11,7 @@ import { TagHistory } from "../../components/profile/tag-history";
 import { Leaderboards } from "../../components/profile/leaderboards";
 import { AvatarPicker } from "../../components/profile/avatar-picker";
 import { AchievementsList } from "../../components/profile/achievements-list";
+import { shareProfile } from "../../lib/sharing";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -83,6 +84,20 @@ export default function ProfileScreen() {
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
       {/* Settings gear */}
       <View style={styles.settingsRow}>
+        <Pressable
+          style={styles.settingsButton}
+          onPress={() =>
+            shareProfile({
+              id: profile.id,
+              username: profile.username,
+              level: profile.level,
+              tagCount,
+              crewName: null,
+            })
+          }
+        >
+          <Text style={styles.shareProfileText}>Share Profile</Text>
+        </Pressable>
         <Pressable
           style={styles.settingsButton}
           onPress={() => router.push("/settings")}
@@ -170,8 +185,9 @@ const styles = StyleSheet.create({
   content: { paddingTop: 60, paddingBottom: 120, gap: 24 },
   loading: { flex: 1, backgroundColor: "#1a1a2e", alignItems: "center", justifyContent: "center" },
   loadingText: { color: "#666", fontSize: 14 },
-  settingsRow: { alignItems: "flex-end", paddingHorizontal: 16 },
+  settingsRow: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 16 },
   settingsButton: { padding: 8 },
+  shareProfileText: { color: "#4ecdc4", fontSize: 14, fontWeight: "600" },
   settingsText: { color: "#4ecdc4", fontSize: 14, fontWeight: "600" },
   header: { alignItems: "center", gap: 8 },
   username: { color: "#fff", fontSize: 22, fontWeight: "bold" },
