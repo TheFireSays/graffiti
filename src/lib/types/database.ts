@@ -1,3 +1,4 @@
+Connecting to db 5432
 export type Json =
   | string
   | number
@@ -95,6 +96,116 @@ export type Database = {
             columns: ["zone_id"]
             isOneToOne: false
             referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crew_direct_invites: {
+        Row: {
+          created_at: string
+          crew_id: string
+          expires_at: string
+          id: string
+          inviter_id: string
+          status: string
+          target_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          crew_id: string
+          expires_at?: string
+          id?: string
+          inviter_id: string
+          status?: string
+          target_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          crew_id?: string
+          expires_at?: string
+          id?: string
+          inviter_id?: string
+          status?: string
+          target_user_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crew_direct_invites_crew_id_fkey"
+            columns: ["crew_id"]
+            isOneToOne: false
+            referencedRelation: "crews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crew_direct_invites_inviter_id_fkey"
+            columns: ["inviter_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crew_direct_invites_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crew_join_requests: {
+        Row: {
+          created_at: string
+          crew_id: string
+          id: string
+          message: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          crew_id: string
+          id?: string
+          message?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          crew_id?: string
+          id?: string
+          message?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crew_join_requests_crew_id_fkey"
+            columns: ["crew_id"]
+            isOneToOne: false
+            referencedRelation: "crews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crew_join_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crew_join_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -523,6 +634,7 @@ export type Database = {
         Row: {
           category: string
           created_at: string
+          crew_id: string | null
           customizable_colors: Json
           id: string
           image_url: string
@@ -534,6 +646,7 @@ export type Database = {
         Insert: {
           category: string
           created_at?: string
+          crew_id?: string | null
           customizable_colors?: Json
           id?: string
           image_url: string
@@ -545,6 +658,7 @@ export type Database = {
         Update: {
           category?: string
           created_at?: string
+          crew_id?: string | null
           customizable_colors?: Json
           id?: string
           image_url?: string
@@ -553,7 +667,15 @@ export type Database = {
           name?: string
           tier?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tag_images_crew_id_fkey"
+            columns: ["crew_id"]
+            isOneToOne: false
+            referencedRelation: "crews"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tags: {
         Row: {
@@ -629,6 +751,52 @@ export type Database = {
             columns: ["zone_id"]
             isOneToOne: false
             referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_tag_image_grants: {
+        Row: {
+          crew_id: string
+          granted_at: string
+          id: string
+          tag_image_id: string
+          user_id: string
+        }
+        Insert: {
+          crew_id: string
+          granted_at?: string
+          id?: string
+          tag_image_id: string
+          user_id: string
+        }
+        Update: {
+          crew_id?: string
+          granted_at?: string
+          id?: string
+          tag_image_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_tag_image_grants_crew_id_fkey"
+            columns: ["crew_id"]
+            isOneToOne: false
+            referencedRelation: "crews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_tag_image_grants_tag_image_id_fkey"
+            columns: ["tag_image_id"]
+            isOneToOne: false
+            referencedRelation: "tag_images"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_tag_image_grants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -727,6 +895,7 @@ export type Database = {
     }
     Functions: {
       calculate_level: { Args: { p_xp: number }; Returns: number }
+      cancel_join_request: { Args: { p_request_id: string }; Returns: Json }
       check_restricted_zone: {
         Args: { p_lat: number; p_lng: number }
         Returns: {
@@ -750,6 +919,10 @@ export type Database = {
       }
       get_active_season: { Args: never; Returns: Json }
       get_constant: { Args: { p_key: string }; Returns: number }
+      get_og_eligible_members: {
+        Args: { p_crew_id: string }
+        Returns: string[]
+      }
       get_season_leaderboard: {
         Args: { p_season_id: string }
         Returns: {
@@ -833,10 +1006,23 @@ export type Database = {
         Args: { p_details?: string; p_reason: string; p_tag_id: string }
         Returns: Json
       }
+      request_join_crew: {
+        Args: { p_crew_id: string; p_message?: string }
+        Returns: Json
+      }
+      respond_direct_invite: {
+        Args: { p_accepted: boolean; p_invite_id: string }
+        Returns: Json
+      }
+      review_join_request: {
+        Args: { p_approved: boolean; p_request_id: string }
+        Returns: Json
+      }
       review_report: {
         Args: { p_action: string; p_report_id: string }
         Returns: Json
       }
+      send_direct_invite: { Args: { p_target_username: string }; Returns: Json }
       unregister_push_token: { Args: { p_token: string }; Returns: Json }
       update_profile: {
         Args: {
