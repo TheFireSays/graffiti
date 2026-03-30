@@ -117,3 +117,20 @@ insert into public.activity_feed (event_type, actor_id, crew_id, zone_id, locati
   ('tag_gone_over', 'a1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', 'd1000000-0000-0000-0000-000000000001', ST_GeogFromText('POINT(-97.7440 30.2670)'), '{"original_user": "a1000000-0000-0000-0000-000000000004", "original_crew": "c1000000-0000-0000-0000-000000000002"}'::jsonb),
   ('crew_joined', 'a1000000-0000-0000-0000-000000000004', 'c1000000-0000-0000-0000-000000000002', null, null, '{"crew_name": "Shadow Writers"}'::jsonb),
   ('level_up', 'a1000000-0000-0000-0000-000000000003', 'c1000000-0000-0000-0000-000000000002', null, null, '{"new_level": 15}'::jsonb);
+
+-- ============================================================
+-- Crew Membership: Test data for join requests and direct invites
+-- ============================================================
+
+-- PHANTOM (crewless) has a pending join request to Urban Kings
+insert into public.crew_join_requests (user_id, crew_id, message)
+values (
+  'a1000000-0000-0000-0000-000000000006',
+  'c1000000-0000-0000-0000-000000000001',
+  'Want to tag with UKG!'
+);
+
+-- Mark Wildstyle Piece as crew-exclusive for Urban Kings (for testing grants)
+update public.tag_images
+set crew_id = 'c1000000-0000-0000-0000-000000000001'
+where name = 'Wildstyle Piece';

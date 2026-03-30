@@ -14,9 +14,22 @@ comment on column public.crews.last_tagged_at is
 comment on column public.crews.inactivity_warned_at is
   'Set when 25-day inactivity warning is sent; cleared when crew places a new tag';
 
+-- Backfill: set last_tagged_at from existing tag data so old active crews
+-- are not falsely flagged for inactivity on first cron run.
+update public.crews c
+set last_tagged_at = sub.max_tag
+from (
+  select t.crew_id, max(t.created_at) as max_tag
+  from public.tags t
+  where t.crew_id is not null
+  group by t.crew_id
+) sub
+where sub.crew_id = c.id
+  and c.last_tagged_at is null;
+
 -- TRIGGER: update crews.last_tagged_at on tag insert
 create or replace function trg_crew_last_tagged_at()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer set search_path = public as $$
 begin
   if NEW.crew_id is not null then
     update public.crews
@@ -34,7 +47,7 @@ create trigger trg_crew_last_tagged_at
 
 -- FUNCTION: process_crew_inactivity()
 create or replace function process_crew_inactivity()
-returns void language plpgsql security definer as $$
+returns void language plpgsql security definer set search_path = public as $$
 declare
   v_crew       record;
   v_member_ids uuid[];
