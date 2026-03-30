@@ -5,10 +5,12 @@ import { supabase } from "../../lib/supabase";
 import { useAuthStore } from "../../stores/auth-store";
 import { containsProfanity } from "../../lib/profanity";
 import { useProfileStore } from "../../stores/profile-store";
+import { useAchievementStore } from "../../stores/achievement-store";
 import { StatCards } from "../../components/profile/stat-cards";
 import { TagHistory } from "../../components/profile/tag-history";
 import { Leaderboards } from "../../components/profile/leaderboards";
 import { AvatarPicker } from "../../components/profile/avatar-picker";
+import { AchievementsList } from "../../components/profile/achievements-list";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -29,14 +31,18 @@ export default function ProfileScreen() {
   const seasonLeaderboard = useProfileStore((s) => s.seasonLeaderboard);
   const loadActiveSeason = useProfileStore((s) => s.loadActiveSeason);
   const loadSeasonLeaderboard = useProfileStore((s) => s.loadSeasonLeaderboard);
+  const achievements = useAchievementStore((s) => s.achievements);
+  const isLoadingAchievements = useAchievementStore((s) => s.isLoading);
+  const loadAchievements = useAchievementStore((s) => s.loadAchievements);
 
   useEffect(() => {
     if (profile) {
       loadTagHistory(profile.id);
       loadLeaderboards();
       loadActiveSeason();
+      loadAchievements(profile.id);
     }
-  }, [profile, loadTagHistory, loadLeaderboards, loadActiveSeason]);
+  }, [profile, loadTagHistory, loadLeaderboards, loadActiveSeason, loadAchievements]);
 
   useEffect(() => {
     if (activeSeason) {
@@ -89,6 +95,11 @@ export default function ProfileScreen() {
       <View style={styles.header}>
         <AvatarPicker />
         <Text style={styles.username}>{profile.username}</Text>
+        {achievements.length > 0 && (
+          <Text style={styles.achievementCount}>
+            {achievements.filter((a) => a.unlocked).length}/{achievements.length} Achievements
+          </Text>
+        )}
         {editing ? (
           <View style={styles.editRow}>
             <TextInput
@@ -128,6 +139,11 @@ export default function ProfileScreen() {
         tagCount={tagCount}
       />
 
+      {/* Achievements */}
+      <View style={styles.section}>
+        <AchievementsList achievements={achievements} isLoading={isLoadingAchievements} />
+      </View>
+
       {/* Tag History */}
       <View style={styles.section}>
         <TagHistory tags={tagHistory} isLoading={isLoadingHistory} />
@@ -159,6 +175,7 @@ const styles = StyleSheet.create({
   settingsText: { color: "#4ecdc4", fontSize: 14, fontWeight: "600" },
   header: { alignItems: "center", gap: 8 },
   username: { color: "#fff", fontSize: 22, fontWeight: "bold" },
+  achievementCount: { color: "#4ecdc4", fontSize: 12, fontWeight: "600" },
   crewLabel: { color: "#999", fontSize: 14 },
   editRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 16 },
   editInput: {
