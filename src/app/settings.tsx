@@ -8,11 +8,13 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { supabase } from "../lib/supabase";
 import { useAuthStore } from "../stores/auth-store";
 import { containsProfanity } from "../lib/profanity";
+import { DEMO_MODE } from "../lib/config";
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -52,6 +54,13 @@ export default function SettingsScreen() {
     setError("");
     setSuccess("");
 
+    if (DEMO_MODE) {
+      await new Promise((r) => setTimeout(r, 400));
+      setSaving(false);
+      setSuccess("Profile updated! (demo mode)");
+      return;
+    }
+
     const { data, error: rpcError } = await supabase.rpc("update_profile", {
       p_username: trimmedUsername,
       p_display_name: trimmedDisplay || trimmedUsername,
@@ -75,6 +84,11 @@ export default function SettingsScreen() {
   }
 
   function handleDeleteAccount() {
+    if (DEMO_MODE) {
+      const msg = "Account deletion is disabled in demo mode.";
+      if (Platform.OS === "web") { window.alert(msg); } else { Alert.alert("Demo Mode", msg); }
+      return;
+    }
     Alert.alert(
       "Delete Account",
       "This will permanently delete your account, remove you from your crew, and clear all personal data. This cannot be undone.",
@@ -109,7 +123,7 @@ export default function SettingsScreen() {
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
+        <Pressable onPress={() => router.canGoBack() ? router.back() : router.replace("/")} style={styles.backButton}>
           <Text style={styles.backText}>Back</Text>
         </Pressable>
         <Text style={styles.title}>Settings</Text>

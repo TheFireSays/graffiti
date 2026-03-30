@@ -53,3 +53,6 @@ supabase/.branches/
 
 # Superpowers
 .superpowers/
+test-*.png
+.playwright-mcp/
+CC_DIRECTIVE_*.md

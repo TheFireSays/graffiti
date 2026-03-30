@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from "react-native";
+import { useState } from "react";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import type { SeasonInfo } from "../../stores/profile-store";
 
 interface SeasonBannerProps {
@@ -6,6 +7,10 @@ interface SeasonBannerProps {
 }
 
 export function SeasonBanner({ season }: SeasonBannerProps) {
+  const [dismissed, setDismissed] = useState(false);
+
+  if (dismissed) return null;
+
   const daysLeft = Math.max(
     0,
     Math.ceil((new Date(season.endsAt).getTime() - Date.now()) / 86400000)
@@ -16,6 +21,9 @@ export function SeasonBanner({ season }: SeasonBannerProps) {
       <Text style={styles.label}>SEASON ACTIVE</Text>
       <Text style={styles.name}>{season.name}</Text>
       <Text style={styles.timer}>{daysLeft}d remaining</Text>
+      <Pressable onPress={() => setDismissed(true)} style={styles.closeButton} hitSlop={8}>
+        <Text style={styles.closeText}>✕</Text>
+      </Pressable>
     </View>
   );
 }
@@ -50,5 +58,17 @@ const styles = StyleSheet.create({
     color: "#1a1a2e",
     fontSize: 12,
     fontWeight: "600",
+  },
+  closeButton: {
+    marginLeft: 8,
+    width: 20,
+    height: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  closeText: {
+    color: "#1a1a2e",
+    fontSize: 13,
+    fontWeight: "bold",
   },
 });
