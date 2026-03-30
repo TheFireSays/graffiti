@@ -10,7 +10,8 @@
     "web": "expo start --web",
     "test": "npx jest",
     "test:coverage": "npx jest --coverage",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "demo": "EXPO_PUBLIC_DEMO_MODE=true expo start --web --port 8081"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

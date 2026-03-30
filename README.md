@@ -99,6 +99,18 @@ Migrations are in `supabase/migrations/` and applied in order by `supabase db re
 - `00017–00020` — Scoring RPCs, zone control trigger, tag decay
 - `00023–00027` — Security hardening (auth.uid() enforcement, transactional crew RPCs, restricted user updates)
 
+## Demo
+
+Run the app in demo mode (mock data, no backend required):
+
+```bash
+npm run demo
+```
+
+Open http://localhost:8081 in your browser. All screens are populated with sample data.
+
+Demo mode activates automatically on web or when `EXPO_PUBLIC_DEMO_MODE=true` is set. It bypasses Supabase auth and uses realistic mock data for all screens: map zones, tag markers, crew roster, leaderboards, activity feed, and missions.
+
 ## Physical Device Testing
 
 1. Log in to EAS: `npx eas-cli login`
