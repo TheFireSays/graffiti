@@ -600,6 +600,57 @@ export type Database = {
         }
         Relationships: []
       }
+      moderation_audit_log: {
+        Row: {
+          id: string
+          moderator_id: string
+          action: string
+          target_user_id: string | null
+          target_tag_id: string | null
+          target_crew_id: string | null
+          notes: string | null
+          metadata: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          moderator_id: string
+          action: string
+          target_user_id?: string | null
+          target_tag_id?: string | null
+          target_crew_id?: string | null
+          notes?: string | null
+          metadata?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          moderator_id?: string
+          action?: string
+          target_user_id?: string | null
+          target_tag_id?: string | null
+          target_crew_id?: string | null
+          notes?: string | null
+          metadata?: Json
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_audit_log_moderator_id_fkey"
+            columns: ["moderator_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_audit_log_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suspicious_activity: {
         Row: {
           created_at: string
@@ -893,11 +944,63 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      moderation_queue: {
+        Row: {
+          report_id: string
+          reason: string
+          details: string | null
+          reported_at: string
+          tag_id: string
+          tag_image_url: string
+          tag_lat: number
+          tag_lng: number
+          zone_name: string | null
+          tag_placed_at: string
+          reporter_username: string
+          reported_user_id: string
+          reported_username: string
+          reported_user_banned: boolean
+          total_reports_against_user: number
+        }
+        Relationships: []
+      }
+      suspicious_users: {
+        Row: {
+          user_id: string
+          username: string
+          is_banned: boolean
+          violation_count: number
+          violation_types: string[]
+          most_recent_violation: string
+          total_xp: number
+          total_tags: number
+          account_created_at: string
+          account_age: unknown
+        }
+        Relationships: []
+      }
+      banned_users: {
+        Row: {
+          user_id: string
+          username: string
+          email: string
+          is_banned: boolean
+          banned_at: string | null
+          ban_reason: string | null
+          banned_by: string | null
+          total_reports: number
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      ban_user: {
+        Args: { p_user_id: string; p_reason: string }
+        Returns: Json
+      }
       calculate_level: { Args: { p_xp: number }; Returns: number }
       cancel_join_request: { Args: { p_request_id: string }; Returns: Json }
+      check_profanity: { Args: { p_text: string }; Returns: boolean }
       check_restricted_zone: {
         Args: { p_lat: number; p_lng: number }
         Returns: {
@@ -911,6 +1014,14 @@ export type Database = {
       }
       decay_expired_tags: { Args: never; Returns: Json }
       delete_account: { Args: never; Returns: Json }
+      delete_tag_moderation: {
+        Args: { p_tag_id: string; p_reason: string }
+        Returns: Json
+      }
+      dissolve_crew_moderation: {
+        Args: { p_crew_id: string; p_reason: string }
+        Returns: Json
+      }
       find_zone_for_point: {
         Args: { p_lat: number; p_lng: number }
         Returns: string
@@ -1039,6 +1150,14 @@ export type Database = {
       }
       send_direct_invite: { Args: { p_target_username: string }; Returns: Json }
       unregister_push_token: { Args: { p_token: string }; Returns: Json }
+      warn_user: {
+        Args: { p_user_id: string; p_message: string }
+        Returns: Json
+      }
+      unban_user: {
+        Args: { p_user_id: string; p_reason: string }
+        Returns: Json
+      }
       update_profile: {
         Args: {
           p_avatar_url?: string
