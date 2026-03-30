@@ -313,6 +313,21 @@
 
 ---
 
+## Session C — Demo-Ready App (Complete)
+
+**Branch:** `dev/demo`
+
+- [x] Phase 1: Assess renderability — DEMO_STATUS.md documents all screens, native deps, and web strategy
+- [x] Phase 2: Web fallbacks — map-web-fallback (zone cards + tag dots), camera-web-fallback (brick wall + HUD)
+- [x] Phase 3: Mock data — 8 tags, 5 zones, 5 crew members, 10 activity feed items, leaderboards, missions, season
+- [x] Phase 4: Wire mock data — auth-store, map-store, profile-store, crew-store all return mock data when DEMO_MODE=true
+- [x] Phase 5: Visual polish — conditional imports for web vs native, demo location (Austin, TX)
+- [x] Phase 6: Demo launch script — `npm run demo` + `scripts/demo.sh`
+- [x] Phase 7: README demo section
+- [x] Verification — 152 tests, 0 type errors, 0 lint errors
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
