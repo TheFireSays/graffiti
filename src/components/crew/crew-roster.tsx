@@ -19,7 +19,7 @@ const ROLE_COLORS: Record<string, string> = {
   member: "#999",
 };
 
-export function CrewRoster({ members, ogEligibleIds, activityScores }: CrewRosterProps) {
+export function CrewRoster({ members, ogEligibleIds = [], activityScores = [] }: CrewRosterProps) {
   const scoreMap = new Map(activityScores.map((s) => [s.userId, s]));
 
   return (
