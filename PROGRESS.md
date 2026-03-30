@@ -347,6 +347,21 @@
 
 ---
 
+## CC Directive A — Phase 4: Admin Moderation Tools (Complete)
+
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-30-admin-moderation.md`
+
+- [x] Task 1: Admin role migration (00044) — role column, banned_until/ban_reason, is_admin/is_moderator helpers
+- [x] Task 2: Moderation RPCs (00045) — get_pending_reports, moderate_report (dismiss/warn/remove/ban), ban_user, unban_user
+- [x] Task 3: Ban enforcement (00046) — check_ban_status helper, ban checks in create_crew/join_crew, auto-unban
+- [x] Task 4: Season management RPCs (00047) — create_season, end_season, seed_daily_missions
+- [x] Task 5: Regenerated database types
+- [x] Task 6: Tests — 8 integration tests for admin moderation RPCs
+- [x] Task 7: Verification — 47 migrations clean, 191 tests, 0 type errors, 0 lint errors
+- [x] Pushed to remote
+
+---
+
 ## Session B — Phase 2: Achievements & Badges System (Complete)
 
 **Branch:** `dev/features-b`
