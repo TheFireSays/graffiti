@@ -803,6 +803,8 @@ export type Database = {
       users: {
         Row: {
           avatar_url: string | null
+          ban_reason: string | null
+          banned_until: string | null
           created_at: string
           crew_id: string | null
           display_name: string
@@ -810,12 +812,15 @@ export type Database = {
           is_banned: boolean
           last_tagged_at: string | null
           level: number
+          role: string | null
           spray_cans: number
           username: string
           xp: number
         }
         Insert: {
           avatar_url?: string | null
+          ban_reason?: string | null
+          banned_until?: string | null
           created_at?: string
           crew_id?: string | null
           display_name?: string
@@ -823,12 +828,15 @@ export type Database = {
           is_banned?: boolean
           last_tagged_at?: string | null
           level?: number
+          role?: string | null
           spray_cans?: number
           username: string
           xp?: number
         }
         Update: {
           avatar_url?: string | null
+          ban_reason?: string | null
+          banned_until?: string | null
           created_at?: string
           crew_id?: string | null
           display_name?: string
@@ -836,6 +844,7 @@ export type Database = {
           is_banned?: boolean
           last_tagged_at?: string | null
           level?: number
+          role?: string | null
           spray_cans?: number
           username?: string
           xp?: number
@@ -893,8 +902,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ban_user: {
+        Args: { p_duration_days?: number; p_reason: string; p_user_id: string }
+        Returns: Json
+      }
       calculate_level: { Args: { p_xp: number }; Returns: number }
       check_achievements: { Args: { p_user_id: string }; Returns: Json }
+      check_ban_status: { Args: { p_user_id: string }; Returns: Json }
       check_mission_progress: {
         Args: { p_action: string; p_user_id: string; p_zone_id?: string }
         Returns: undefined
@@ -914,8 +928,18 @@ export type Database = {
         Args: { p_abbreviation: string; p_color: string; p_name: string }
         Returns: Json
       }
+      create_season: {
+        Args: {
+          p_config?: Json
+          p_ends_at: string
+          p_name: string
+          p_starts_at: string
+        }
+        Returns: Json
+      }
       decay_expired_tags: { Args: never; Returns: Json }
       delete_account: { Args: never; Returns: Json }
+      end_season: { Args: { p_season_id: string }; Returns: Json }
       find_zone_for_point: {
         Args: { p_lat: number; p_lng: number }
         Returns: string
@@ -943,6 +967,20 @@ export type Database = {
       }
       get_active_season: { Args: never; Returns: Json }
       get_constant: { Args: { p_key: string }; Returns: number }
+      get_pending_reports: {
+        Args: never
+        Returns: {
+          created_at: string
+          details: string
+          reason: string
+          report_id: string
+          reporter_username: string
+          status: string
+          tag_id: string
+          tag_image_id: string
+          tag_user_username: string
+        }[]
+      }
       get_season_leaderboard: {
         Args: { p_season_id: string }
         Returns: {
@@ -989,10 +1027,16 @@ export type Database = {
           tag_counts: Json
         }[]
       }
+      is_admin: { Args: never; Returns: boolean }
+      is_moderator: { Args: never; Returns: boolean }
       join_crew: { Args: { p_invite_code: string }; Returns: Json }
       leave_crew: { Args: never; Returns: Json }
       mark_notifications_read: {
         Args: { p_notification_ids: string[] }
+        Returns: Json
+      }
+      moderate_report: {
+        Args: { p_action: string; p_report_id: string }
         Returns: Json
       }
       place_tag_scored:
@@ -1031,6 +1075,8 @@ export type Database = {
         Args: { p_action: string; p_report_id: string }
         Returns: Json
       }
+      seed_daily_missions: { Args: never; Returns: Json }
+      unban_user: { Args: { p_user_id: string }; Returns: Json }
       unregister_push_token: { Args: { p_token: string }; Returns: Json }
       update_profile: {
         Args: {
