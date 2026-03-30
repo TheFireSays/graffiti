@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { supabase } from "../lib/supabase";
+import { DEMO_MODE } from "../lib/config";
+import { mockTopUsers, mockTopCrews, mockTagHistory, mockSeason } from "../lib/mock-data";
 
 interface TagHistoryItem {
   id: string;
@@ -82,6 +84,24 @@ export const useProfileStore = create<ProfileStoreState>((set) => ({
   isLoadingSeason: false,
 
   loadTagHistory: async (userId) => {
+    if (DEMO_MODE) {
+      set({
+        tagHistory: mockTagHistory.map((t) => ({
+          id: t.id,
+          tagImageName: t.tag_image_name,
+          tagCategory: "tag",
+          crewAbbreviation: "KOA",
+          crewColor: "#FF4136",
+          status: "active",
+          createdAt: t.created_at,
+          zoneName: t.zone_name,
+        })),
+        tagCount: mockTagHistory.length,
+        isLoadingHistory: false,
+      });
+      return;
+    }
+
     set({ isLoadingHistory: true });
 
     const { data, error, count } = await supabase
@@ -119,6 +139,30 @@ export const useProfileStore = create<ProfileStoreState>((set) => ({
   },
 
   loadLeaderboards: async () => {
+    if (DEMO_MODE) {
+      set({
+        topUsers: mockTopUsers.map((u) => ({
+          id: u.id,
+          username: u.username,
+          level: u.level,
+          xp: u.xp,
+          crewAbbreviation: null,
+          crewColor: null,
+        })),
+        topCrews: mockTopCrews.map((c) => ({
+          id: c.id,
+          name: c.name,
+          abbreviation: c.abbreviation,
+          color: c.color,
+          totalXp: c.total_xp,
+          zonesControlled: c.zones_controlled,
+          memberCount: c.member_count,
+        })),
+        isLoadingLeaderboards: false,
+      });
+      return;
+    }
+
     set({ isLoadingLeaderboards: true });
 
     const [usersResult, crewsResult] = await Promise.all([
@@ -168,6 +212,20 @@ export const useProfileStore = create<ProfileStoreState>((set) => ({
   },
 
   loadActiveSeason: async () => {
+    if (DEMO_MODE) {
+      set({
+        activeSeason: {
+          id: mockSeason.id,
+          name: mockSeason.name,
+          startsAt: mockSeason.starts_at,
+          endsAt: mockSeason.ends_at,
+          status: mockSeason.status,
+        },
+        isLoadingSeason: false,
+      });
+      return;
+    }
+
     set({ isLoadingSeason: true });
     const { data, error } = await supabase.rpc("get_active_season");
     if (!error && data && data !== null) {
@@ -192,6 +250,22 @@ export const useProfileStore = create<ProfileStoreState>((set) => ({
   },
 
   loadSeasonLeaderboard: async (seasonId) => {
+    if (DEMO_MODE) {
+      set({
+        seasonLeaderboard: mockTopCrews.map((c, i) => ({
+          crewId: c.id,
+          crewName: c.name,
+          crewAbbreviation: c.abbreviation,
+          crewColor: c.color,
+          zonesHeld: c.zones_controlled,
+          tagsPlaced: Math.floor(c.total_xp / 10),
+          tagsGoneOver: Math.floor(c.total_xp / 50),
+          totalXp: c.total_xp,
+          rank: i + 1,
+        })),
+      });
+      return;
+    }
     const { data, error } = await supabase.rpc("get_season_leaderboard", {
       p_season_id: seasonId,
     });

@@ -11,6 +11,8 @@ import { ErrorBoundary } from "../components/error-boundary";
 import { SyncToast } from "../components/offline/sync-toast";
 import { useOfflineSync } from "../hooks/use-offline-sync";
 import { initErrorReporting } from "../lib/error-reporting";
+import { DEMO_MODE } from "../lib/config";
+import { mockSession } from "../lib/mock-data";
 
 initErrorReporting();
 
@@ -32,6 +34,12 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
+    if (DEMO_MODE) {
+      // Skip auth and use mock session directly
+      setSession(mockSession as any);
+      return;
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });

@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { supabase } from "../lib/supabase";
+import { DEMO_MODE } from "../lib/config";
+import { mockCrew, mockCrewMembers } from "../lib/mock-data";
 
 interface CrewMember {
   userId: string;
@@ -62,6 +64,25 @@ export const useCrewStore = create<CrewState>((set, get) => ({
   error: null,
 
   loadCrew: async (crewId) => {
+    if (DEMO_MODE) {
+      set({
+        crew: {
+          id: mockCrew.id,
+          name: mockCrew.name,
+          abbreviation: mockCrew.abbreviation,
+          color: mockCrew.color,
+          founderId: mockCrew.founder_id,
+          memberCount: mockCrew.member_count,
+          totalXp: 8800,
+          zonesControlled: 2,
+          createdAt: mockCrew.created_at,
+        },
+        userRole: "og",
+        isLoading: false,
+      });
+      return;
+    }
+
     set({ isLoading: true, error: null });
     const { data, error } = await supabase
       .from("crews")
@@ -91,6 +112,21 @@ export const useCrewStore = create<CrewState>((set, get) => ({
   },
 
   loadMembers: async (crewId) => {
+    if (DEMO_MODE) {
+      set({
+        members: mockCrewMembers.map((m) => ({
+          userId: m.userId,
+          username: m.username,
+          displayName: m.username,
+          role: m.role,
+          level: m.level ?? 1,
+          xp: 0,
+          joinedAt: "2026-03-01T00:00:00Z",
+        })),
+      });
+      return;
+    }
+
     const { data, error } = await supabase
       .from("crew_members")
       .select(`
@@ -118,6 +154,20 @@ export const useCrewStore = create<CrewState>((set, get) => ({
   },
 
   loadInvites: async (crewId) => {
+    if (DEMO_MODE) {
+      set({
+        invites: [{
+          id: "inv1",
+          code: "DEMO-JOIN",
+          createdByUsername: "KRUSH",
+          maxUses: 10,
+          useCount: 3,
+          expiresAt: null,
+          createdAt: "2026-03-15T00:00:00Z",
+        }],
+      });
+      return;
+    }
     const { data, error } = await supabase
       .from("invites")
       .select(`

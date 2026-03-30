@@ -9,6 +9,8 @@ import {
 } from "../lib/geo";
 import { supabase } from "../lib/supabase";
 import type { RealtimeChannel } from "@supabase/supabase-js";
+import { DEMO_MODE } from "../lib/config";
+import { mockTags, mockZones, mockTopCrews } from "../lib/mock-data";
 
 interface MapState {
   zones: MapZone[];
@@ -35,6 +37,16 @@ export const useMapStore = create<MapState>((set, get) => ({
   realtimeChannel: null,
 
   loadMapData: async () => {
+    if (DEMO_MODE) {
+      set({
+        zones: mockZones as unknown as MapZone[],
+        tags: mockTags as unknown as MapTag[],
+        crews: mockTopCrews as unknown as MapCrew[],
+        isLoading: false,
+      });
+      return;
+    }
+
     set({ isLoading: true });
     const [zones, tags, crews] = await Promise.all([
       fetchZonesForMap(),
@@ -53,6 +65,7 @@ export const useMapStore = create<MapState>((set, get) => ({
   },
 
   subscribeToChanges: () => {
+    if (DEMO_MODE) return;
     const { realtimeChannel } = get();
     if (realtimeChannel) return; // already subscribed
 
