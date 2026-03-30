@@ -1,16 +1,27 @@
-import { useState } from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { useState, useEffect } from "react";
+import { ScrollView, Text, Pressable, StyleSheet } from "react-native";
 import { CreateCrewForm } from "./create-crew-form";
 import { JoinCrewForm } from "./join-crew-form";
+import { PendingMemberships } from "./pending-memberships";
+import { useCrewStore } from "../../stores/crew-store";
 
 interface NoCrewViewProps {
   onCrewChanged: () => void;
+  userId: string;
 }
 
 type Screen = "choose" | "create" | "join";
 
-export function NoCrewView({ onCrewChanged }: NoCrewViewProps) {
+export function NoCrewView({ onCrewChanged, userId }: NoCrewViewProps) {
   const [screen, setScreen] = useState<Screen>("choose");
+
+  const pendingIncomingInvites = useCrewStore((s) => s.pendingIncomingInvites);
+  const pendingOutgoingRequests = useCrewStore((s) => s.pendingOutgoingRequests);
+  const loadPendingMemberships = useCrewStore((s) => s.loadPendingMemberships);
+
+  useEffect(() => {
+    loadPendingMemberships(userId);
+  }, [userId]);
 
   if (screen === "create") {
     return <CreateCrewForm onBack={() => setScreen("choose")} onCreated={onCrewChanged} />;
@@ -21,7 +32,7 @@ export function NoCrewView({ onCrewChanged }: NoCrewViewProps) {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>No Crew</Text>
       <Text style={styles.subtitle}>Create your own crew or join one with an invite code</Text>
 
@@ -32,7 +43,13 @@ export function NoCrewView({ onCrewChanged }: NoCrewViewProps) {
       <Pressable style={styles.joinButton} onPress={() => setScreen("join")}>
         <Text style={styles.joinButtonText}>Join with Invite Code</Text>
       </Pressable>
-    </View>
+
+      <PendingMemberships
+        incomingInvites={pendingIncomingInvites}
+        outgoingRequests={pendingOutgoingRequests}
+        onCrewJoined={onCrewChanged}
+      />
+    </ScrollView>
   );
 }
 

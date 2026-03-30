@@ -12,10 +12,14 @@ export default function CrewScreen() {
   const crew = useCrewStore((s) => s.crew);
   const members = useCrewStore((s) => s.members);
   const invites = useCrewStore((s) => s.invites);
+  const joinRequests = useCrewStore((s) => s.joinRequests);
+  const directInvites = useCrewStore((s) => s.directInvites);
   const isLoading = useCrewStore((s) => s.isLoading);
   const loadCrew = useCrewStore((s) => s.loadCrew);
   const loadMembers = useCrewStore((s) => s.loadMembers);
   const loadInvites = useCrewStore((s) => s.loadInvites);
+  const loadJoinRequests = useCrewStore((s) => s.loadJoinRequests);
+  const loadDirectInvites = useCrewStore((s) => s.loadDirectInvites);
   const clearCrew = useCrewStore((s) => s.clearCrew);
 
   useEffect(() => {
@@ -23,10 +27,12 @@ export default function CrewScreen() {
       loadCrew(profile.crew_id);
       loadMembers(profile.crew_id);
       loadInvites(profile.crew_id);
+      loadJoinRequests(profile.crew_id);
+      loadDirectInvites(profile.crew_id);
     } else {
       clearCrew();
     }
-  }, [profile?.crew_id, loadCrew, loadMembers, loadInvites, clearCrew]);
+  }, [profile?.crew_id, loadCrew, loadMembers, loadInvites, loadJoinRequests, loadDirectInvites, clearCrew]);
 
   const userRole = members.find((m) => m.userId === profile?.id)?.role ?? null;
 
@@ -53,7 +59,7 @@ export default function CrewScreen() {
   if (!profile.crew_id || !crew) {
     return (
       <View style={styles.container}>
-        <NoCrewView onCrewChanged={handleCrewChanged} />
+        <NoCrewView onCrewChanged={handleCrewChanged} userId={profile.id} />
       </View>
     );
   }
@@ -64,8 +70,11 @@ export default function CrewScreen() {
         crew={crew}
         members={members}
         invites={invites}
+        joinRequests={joinRequests}
+        directInvites={directInvites}
         userId={profile.id}
         userRole={userRole ?? "member"}
+        isOgEligible={userRole === "og" || userRole === "core"}
         onLeft={handleCrewChanged}
       />
     </View>

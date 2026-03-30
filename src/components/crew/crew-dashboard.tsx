@@ -5,27 +5,31 @@ import {
 import { useCrewStore } from "../../stores/crew-store";
 import { CrewRoster } from "./crew-roster";
 import { CrewInvites } from "./crew-invites";
-import type { CrewInfo, CrewMember, CrewInvite } from "../../stores/crew-store";
+import { CrewRequestsTab } from "./crew-requests-tab";
+import type { CrewInfo, CrewMember, CrewInvite, JoinRequest, DirectInvite } from "../../stores/crew-store";
 
 interface CrewDashboardProps {
   crew: CrewInfo;
   members: CrewMember[];
   invites: CrewInvite[];
+  joinRequests: JoinRequest[];
+  directInvites: DirectInvite[];
   userId: string;
   userRole: string;
+  isOgEligible: boolean;
   onLeft: () => void;
 }
 
-type Tab = "roster" | "invites";
+type Tab = "roster" | "invites" | "requests";
 
 export function CrewDashboard({
-  crew, members, invites, userId, userRole, onLeft,
+  crew, members, invites, joinRequests, directInvites, userId, userRole, isOgEligible, onLeft,
 }: CrewDashboardProps) {
   const [activeTab, setActiveTab] = useState<Tab>("roster");
   const leaveCrew = useCrewStore((s) => s.leaveCrew);
 
   const isFounder = userRole === "og";
-  const canCreateInvites = userRole === "og" || userRole === "core";
+  const canCreateInvites = isOgEligible;
 
   async function handleLeave() {
     if (isFounder) {
@@ -72,6 +76,16 @@ export function CrewDashboard({
             Invites
           </Text>
         </Pressable>
+        {isOgEligible && (
+          <Pressable
+            style={[styles.tab, activeTab === "requests" && styles.activeTab]}
+            onPress={() => setActiveTab("requests")}
+          >
+            <Text style={[styles.tabText, activeTab === "requests" && styles.activeTabText]}>
+              Requests ({joinRequests.length})
+            </Text>
+          </Pressable>
+        )}
       </View>
 
       {/* Content */}
@@ -83,7 +97,12 @@ export function CrewDashboard({
             crewId={crew.id}
             userId={userId}
             canCreateInvites={canCreateInvites}
+            isOgEligible={isOgEligible}
+            directInvites={directInvites}
           />
+        )}
+        {activeTab === "requests" && isOgEligible && (
+          <CrewRequestsTab crewId={crew.id} />
         )}
       </View>
 

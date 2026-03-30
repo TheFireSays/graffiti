@@ -1,12 +1,21 @@
+import { useState } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import type { MapZone } from "../../lib/geo";
+import { useMapStore } from "../../stores/map-store";
+import { JoinRequestForm } from "../crew/join-request-form";
 
 interface ZoneInfoSheetProps {
   zone: MapZone;
   onClose: () => void;
+  userCrewId?: string | null;
 }
 
-export function ZoneInfoSheet({ zone, onClose }: ZoneInfoSheetProps) {
+export function ZoneInfoSheet({ zone, onClose, userCrewId = null }: ZoneInfoSheetProps) {
+  const crews = useMapStore((s) => s.crews);
+  const crewLookup = Object.fromEntries(
+    crews.map((c) => [c.id, { abbreviation: c.abbreviation, color: c.color }])
+  );
+
   const totalTags = Object.values(zone.tagCounts).reduce(
     (sum, count) => sum + count,
     0
@@ -14,6 +23,8 @@ export function ZoneInfoSheet({ zone, onClose }: ZoneInfoSheetProps) {
 
   const isControlled = zone.controllingCrewId != null;
   const crewColor = zone.controllingCrewColor ?? "#666";
+  const [showJoinForm, setShowJoinForm] = useState(false);
+  const canRequestJoin = !userCrewId && isControlled;
 
   return (
     <View style={styles.container}>
@@ -53,13 +64,44 @@ export function ZoneInfoSheet({ zone, onClose }: ZoneInfoSheetProps) {
           {Object.entries(zone.tagCounts)
             .sort(([, a], [, b]) => b - a)
             .slice(0, 5)
-            .map(([crewId, count]) => (
-              <View key={crewId} style={styles.breakdownRow}>
-                <Text style={styles.breakdownCrew}>{crewId}</Text>
-                <Text style={styles.breakdownCount}>{count} tags</Text>
-              </View>
-            ))}
+            .map(([crewId, count]) => {
+              const crew = crewLookup[crewId];
+              const label = crew?.abbreviation ?? crewId.slice(0, 6);
+              const color = crew?.color ?? "#999";
+              const isControlling = crewId === zone.controllingCrewId;
+              return (
+                <View key={crewId} style={styles.breakdownRow}>
+                  <View style={styles.breakdownCrewRow}>
+                    <View style={[styles.crewDot, { backgroundColor: color }]} />
+                    <Text style={styles.breakdownCrew}>{label}</Text>
+                    {isControlling && <Text style={styles.crownBadge}>👑</Text>}
+                  </View>
+                  <Text style={[styles.breakdownCount, { color }]}>{count} tags</Text>
+                </View>
+              );
+            })}
         </View>
+      )}
+
+      {canRequestJoin && !showJoinForm && (
+        <Pressable
+          style={styles.joinRequestButton}
+          onPress={() => setShowJoinForm(true)}
+          testID="request-join-button"
+        >
+          <Text style={styles.joinRequestText}>
+            Request to Join {zone.controllingCrewAbbreviation}
+          </Text>
+        </Pressable>
+      )}
+
+      {showJoinForm && zone.controllingCrewId && (
+        <JoinRequestForm
+          crewId={zone.controllingCrewId}
+          crewName={zone.controllingCrewAbbreviation ?? "this crew"}
+          onSubmitted={() => setShowJoinForm(false)}
+          onCancel={() => setShowJoinForm(false)}
+        />
       )}
     </View>
   );
@@ -169,6 +211,20 @@ const styles = StyleSheet.create({
   breakdownRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
+  },
+  breakdownCrewRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  crewDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  crownBadge: {
+    fontSize: 12,
   },
   breakdownCrew: {
     color: "#ccc",
@@ -178,5 +234,17 @@ const styles = StyleSheet.create({
     color: "#4ecdc4",
     fontSize: 14,
     fontWeight: "600",
+  },
+  joinRequestButton: {
+    backgroundColor: "#4ecdc4",
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+    marginTop: 16,
+  },
+  joinRequestText: {
+    color: "#1a1a2e",
+    fontSize: 14,
+    fontWeight: "bold",
   },
 });
