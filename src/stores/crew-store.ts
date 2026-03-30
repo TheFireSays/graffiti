@@ -33,6 +33,7 @@ interface CrewInfo {
   totalXp: number;
   zonesControlled: number;
   createdAt: string;
+  lastTaggedAt: string | null;
 }
 
 interface JoinRequest {
@@ -132,6 +133,7 @@ export const useCrewStore = create<CrewState>((set, get) => ({
           totalXp: 8800,
           zonesControlled: 2,
           createdAt: mockCrew.created_at,
+          lastTaggedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
         },
         userRole: "og",
         isLoading: false,
@@ -162,6 +164,7 @@ export const useCrewStore = create<CrewState>((set, get) => ({
         totalXp: Number(data.total_xp),
         zonesControlled: data.zones_controlled,
         createdAt: data.created_at,
+        lastTaggedAt: data.last_tagged_at ?? null,
       },
       isLoading: false,
     });

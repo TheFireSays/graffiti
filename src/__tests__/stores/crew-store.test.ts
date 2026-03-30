@@ -90,6 +90,58 @@ describe("useCrewStore", () => {
     });
   });
 
+  describe("loadCrew — lastTaggedAt", () => {
+    it("populates lastTaggedAt from the crews row", async () => {
+      resetStore();
+      mockFrom.mockReturnValue(
+        mockChain({
+          data: {
+            id: "crew-1",
+            name: "Test Crew",
+            abbreviation: "TST",
+            color: "#ff0000",
+            founder_id: "user-1",
+            member_count: 3,
+            total_xp: 1000,
+            zones_controlled: 2,
+            created_at: "2026-01-01T00:00:00Z",
+            last_tagged_at: "2026-03-01T12:00:00Z",
+          },
+          error: null,
+        })
+      );
+
+      await useCrewStore.getState().loadCrew("crew-1");
+      const crew = useCrewStore.getState().crew;
+      expect(crew?.lastTaggedAt).toBe("2026-03-01T12:00:00Z");
+    });
+
+    it("sets lastTaggedAt to null when field is missing", async () => {
+      resetStore();
+      mockFrom.mockReturnValue(
+        mockChain({
+          data: {
+            id: "crew-1",
+            name: "New Crew",
+            abbreviation: "NEW",
+            color: "#00ff00",
+            founder_id: "user-1",
+            member_count: 1,
+            total_xp: 0,
+            zones_controlled: 0,
+            created_at: "2026-03-28T00:00:00Z",
+            last_tagged_at: null,
+          },
+          error: null,
+        })
+      );
+
+      await useCrewStore.getState().loadCrew("crew-1");
+      const crew = useCrewStore.getState().crew;
+      expect(crew?.lastTaggedAt).toBeNull();
+    });
+  });
+
   describe("createCrew", () => {
     it("calls create_crew RPC and returns success", async () => {
       mockRpc.mockResolvedValue({
