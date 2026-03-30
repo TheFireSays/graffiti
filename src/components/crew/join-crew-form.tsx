@@ -37,7 +37,7 @@ export function JoinCrewForm({ onBack, onJoined }: JoinCrewFormProps) {
 
   return (
     <View style={styles.container}>
-      <Pressable onPress={onBack} style={styles.backButton}>
+      <Pressable onPress={onBack} style={styles.backButton} accessibilityLabel="Back" accessibilityRole="button">
         <Text style={styles.backText}>Back</Text>
       </Pressable>
 
@@ -60,6 +60,8 @@ export function JoinCrewForm({ onBack, onJoined }: JoinCrewFormProps) {
         style={[styles.button, loading && styles.buttonDisabled]}
         onPress={handleJoin}
         disabled={loading}
+        accessibilityLabel="Join Crew"
+        accessibilityRole="button"
       >
         {loading ? (
           <ActivityIndicator color="#1a1a2e" />

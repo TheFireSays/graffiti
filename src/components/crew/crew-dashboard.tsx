@@ -59,6 +59,8 @@ export function CrewDashboard({
         <Pressable
           style={[styles.tab, activeTab === "roster" && styles.activeTab]}
           onPress={() => setActiveTab("roster")}
+          accessibilityLabel="Roster tab"
+          accessibilityRole="tab"
         >
           <Text style={[styles.tabText, activeTab === "roster" && styles.activeTabText]}>
             Roster ({members.length})
@@ -67,6 +69,8 @@ export function CrewDashboard({
         <Pressable
           style={[styles.tab, activeTab === "invites" && styles.activeTab]}
           onPress={() => setActiveTab("invites")}
+          accessibilityLabel="Invites tab"
+          accessibilityRole="tab"
         >
           <Text style={[styles.tabText, activeTab === "invites" && styles.activeTabText]}>
             Invites
@@ -89,7 +93,7 @@ export function CrewDashboard({
 
       {/* Leave button (non-founders only) */}
       {!isFounder && (
-        <Pressable style={styles.leaveButton} onPress={handleLeave}>
+        <Pressable style={styles.leaveButton} onPress={handleLeave} accessibilityLabel="Leave Crew" accessibilityRole="button">
           <Text style={styles.leaveText}>Leave Crew</Text>
         </Pressable>
       )}

@@ -40,7 +40,7 @@ function MissionCard({ mission, onClaim }: { mission: Mission; onClaim: (id: str
       </View>
 
       {mission.completed && !mission.claimed && (
-        <Pressable style={styles.claimButton} onPress={() => onClaim(mission.id)}>
+        <Pressable style={styles.claimButton} onPress={() => onClaim(mission.id)} accessibilityLabel="Claim Reward" accessibilityRole="button">
           <Text style={styles.claimText}>Claim Reward</Text>
         </Pressable>
       )}

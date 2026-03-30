@@ -32,6 +32,8 @@ export function ColorPicker() {
                   key={color}
                   style={[styles.colorSwatch, { backgroundColor: color }, customColors[slot.slot] === color && styles.colorSwatchSelected]}
                   onPress={() => setColor(slot.slot, color)}
+                  accessibilityLabel={`Select color ${color}`}
+                  accessibilityRole="button"
                 />
               ))}
             </View>

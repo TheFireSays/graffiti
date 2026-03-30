@@ -109,7 +109,7 @@ export default function SettingsScreen() {
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
+        <Pressable onPress={() => router.back()} style={styles.backButton} accessibilityLabel="Go back" accessibilityRole="button">
           <Text style={styles.backText}>Back</Text>
         </Pressable>
         <Text style={styles.title}>Settings</Text>
@@ -146,6 +146,8 @@ export default function SettingsScreen() {
         style={[styles.saveButton, saving && styles.buttonDisabled]}
         onPress={handleSave}
         disabled={saving}
+        accessibilityLabel="Save changes"
+        accessibilityRole="button"
       >
         {saving ? (
           <ActivityIndicator color="#1a1a2e" />
@@ -157,7 +159,7 @@ export default function SettingsScreen() {
       {/* Account Section */}
       <Text style={[styles.sectionTitle, styles.sectionTitleSpaced]}>Account</Text>
 
-      <Pressable style={styles.actionButton} onPress={signOut}>
+      <Pressable style={styles.actionButton} onPress={signOut} accessibilityLabel="Sign out" accessibilityRole="button">
         <Text style={styles.actionText}>Sign Out</Text>
       </Pressable>
 
@@ -165,6 +167,8 @@ export default function SettingsScreen() {
         style={[styles.dangerButton, deleting && styles.buttonDisabled]}
         onPress={handleDeleteAccount}
         disabled={deleting}
+        accessibilityLabel="Delete account"
+        accessibilityRole="button"
       >
         {deleting ? (
           <ActivityIndicator color="#ff4444" />

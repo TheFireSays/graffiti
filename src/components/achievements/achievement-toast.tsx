@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Animated } from "react-native";
 import { useAchievementStore } from "../../stores/achievement-store";
+import { useReducedMotion } from "../../hooks/use-reduced-motion";
 
 const RARITY_COLORS: Record<string, string> = {
   common: "#9e9e9e",
@@ -12,6 +13,7 @@ const RARITY_COLORS: Record<string, string> = {
 export function AchievementToast() {
   const newlyUnlocked = useAchievementStore((s) => s.newlyUnlocked);
   const clearNewlyUnlocked = useAchievementStore((s) => s.clearNewlyUnlocked);
+  const reduceMotion = useReducedMotion();
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(-100)).current;
 
@@ -20,38 +22,49 @@ export function AchievementToast() {
   useEffect(() => {
     if (!current) return;
 
-    Animated.parallel([
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(translateY, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    const timer = setTimeout(() => {
+    if (reduceMotion) {
+      opacity.setValue(1);
+      translateY.setValue(0);
+    } else {
       Animated.parallel([
         Animated.timing(opacity, {
-          toValue: 0,
+          toValue: 1,
           duration: 300,
           useNativeDriver: true,
         }),
         Animated.timing(translateY, {
-          toValue: -100,
+          toValue: 0,
           duration: 300,
           useNativeDriver: true,
         }),
-      ]).start(() => {
+      ]).start();
+    }
+
+    const timer = setTimeout(() => {
+      if (reduceMotion) {
+        opacity.setValue(0);
+        translateY.setValue(-100);
         clearNewlyUnlocked();
-      });
+      } else {
+        Animated.parallel([
+          Animated.timing(opacity, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(translateY, {
+            toValue: -100,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]).start(() => {
+          clearNewlyUnlocked();
+        });
+      }
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [current, opacity, translateY, clearNewlyUnlocked]);
+  }, [current, opacity, translateY, clearNewlyUnlocked, reduceMotion]);
 
   if (!current) return null;
 

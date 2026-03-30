@@ -50,7 +50,7 @@ export function CreateCrewForm({ onBack, onCreated }: CreateCrewFormProps) {
 
   return (
     <View style={styles.container}>
-      <Pressable onPress={onBack} style={styles.backButton}>
+      <Pressable onPress={onBack} style={styles.backButton} accessibilityLabel="Back" accessibilityRole="button">
         <Text style={styles.backText}>Back</Text>
       </Pressable>
 
@@ -84,6 +84,8 @@ export function CreateCrewForm({ onBack, onCreated }: CreateCrewFormProps) {
             key={c}
             style={[styles.colorSwatch, { backgroundColor: c }, color === c && styles.colorSelected]}
             onPress={() => setColor(c)}
+            accessibilityLabel={`Select crew color ${c}`}
+            accessibilityRole="button"
           />
         ))}
       </View>
@@ -92,6 +94,8 @@ export function CreateCrewForm({ onBack, onCreated }: CreateCrewFormProps) {
         style={[styles.button, loading && styles.buttonDisabled]}
         onPress={handleCreate}
         disabled={loading}
+        accessibilityLabel="Create Crew"
+        accessibilityRole="button"
       >
         {loading ? (
           <ActivityIndicator color="#1a1a2e" />

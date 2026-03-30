@@ -36,7 +36,7 @@ export function TagLibrarySheet({ onClose }: TagLibrarySheetProps) {
       <View style={styles.handle} />
       <View style={styles.header}>
         <Text style={styles.title}>Tag Library</Text>
-        <Pressable onPress={onClose} style={styles.closeButton}>
+        <Pressable onPress={onClose} style={styles.closeButton} accessibilityLabel="Close tag library" accessibilityRole="button">
           <Text style={styles.closeText}>X</Text>
         </Pressable>
       </View>
@@ -47,6 +47,8 @@ export function TagLibrarySheet({ onClose }: TagLibrarySheetProps) {
           <Pressable
             style={[styles.tagItem, selectedImage?.id === item.id && styles.tagItemSelected]}
             onPress={() => handleSelect(item)}
+            accessibilityLabel={`Select ${item.name} tag`}
+            accessibilityRole="button"
           >
             {item.imageUrl && item.imageUrl !== "placeholder" ? (
               <Image source={{ uri: item.imageUrl }} style={styles.tagImage} />

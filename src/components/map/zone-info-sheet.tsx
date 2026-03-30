@@ -34,7 +34,7 @@ export function ZoneInfoSheet({ zone, onClose }: ZoneInfoSheetProps) {
               : "Unclaimed territory"}
           </Text>
         </View>
-        <Pressable onPress={onClose} style={styles.closeButton} testID="zone-close">
+        <Pressable onPress={onClose} style={styles.closeButton} testID="zone-close" accessibilityLabel="Close zone info" accessibilityRole="button">
           <Text style={styles.closeText}>X</Text>
         </Pressable>
       </View>

@@ -25,11 +25,11 @@ export function NoCrewView({ onCrewChanged }: NoCrewViewProps) {
       <Text style={styles.title}>No Crew</Text>
       <Text style={styles.subtitle}>Create your own crew or join one with an invite code</Text>
 
-      <Pressable style={styles.createButton} onPress={() => setScreen("create")}>
+      <Pressable style={styles.createButton} onPress={() => setScreen("create")} accessibilityLabel="Create a Crew" accessibilityRole="button">
         <Text style={styles.createButtonText}>Create a Crew</Text>
       </Pressable>
 
-      <Pressable style={styles.joinButton} onPress={() => setScreen("join")}>
+      <Pressable style={styles.joinButton} onPress={() => setScreen("join")} accessibilityLabel="Join with Invite Code" accessibilityRole="button">
         <Text style={styles.joinButtonText}>Join with Invite Code</Text>
       </Pressable>
     </View>

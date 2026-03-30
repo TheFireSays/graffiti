@@ -36,6 +36,8 @@ export function CrewInvites({ invites, crewId, userId, canCreateInvites }: CrewI
           style={[styles.createButton, creating && styles.createButtonDisabled]}
           onPress={handleCreate}
           disabled={creating}
+          accessibilityLabel="Generate Invite Code"
+          accessibilityRole="button"
         >
           {creating ? (
             <ActivityIndicator color="#1a1a2e" />

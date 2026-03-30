@@ -47,7 +47,7 @@ export function TagDetailSheet({ tag, onClose }: TagDetailSheetProps) {
           <Text style={styles.tagName}>{tag.tagImageName}</Text>
           <Text style={styles.tagCategory}>{tag.tagCategory}</Text>
         </View>
-        <Pressable onPress={onClose} style={styles.closeButton}>
+        <Pressable onPress={onClose} style={styles.closeButton} accessibilityLabel="Close tag details" accessibilityRole="button">
           <Text style={styles.closeText}>X</Text>
         </Pressable>
       </View>
@@ -67,6 +67,8 @@ export function TagDetailSheet({ tag, onClose }: TagDetailSheetProps) {
               username: tag.username,
             })
           }
+          accessibilityLabel="Share tag"
+          accessibilityRole="button"
         >
           <Text style={styles.shareText}>Share</Text>
         </Pressable>
@@ -74,6 +76,8 @@ export function TagDetailSheet({ tag, onClose }: TagDetailSheetProps) {
           style={styles.reportButton}
           onPress={handleReport}
           disabled={reporting}
+          accessibilityLabel="Report tag"
+          accessibilityRole="button"
         >
           <Text style={styles.reportText}>
             {reporting ? "Reporting..." : "Report"}

@@ -86,6 +86,8 @@ export default function ProfileScreen() {
       <View style={styles.settingsRow}>
         <Pressable
           style={styles.settingsButton}
+          accessibilityLabel="Share profile"
+          accessibilityRole="button"
           onPress={() =>
             shareProfile({
               id: profile.id,
@@ -100,6 +102,8 @@ export default function ProfileScreen() {
         </Pressable>
         <Pressable
           style={styles.settingsButton}
+          accessibilityLabel="Settings"
+          accessibilityRole="button"
           onPress={() => router.push("/settings")}
         >
           <Text style={styles.settingsText}>Settings</Text>
@@ -125,15 +129,17 @@ export default function ProfileScreen() {
               placeholderTextColor="#666"
               maxLength={30}
             />
-            <Pressable onPress={handleSaveDisplayName}>
+            <Pressable onPress={handleSaveDisplayName} accessibilityLabel="Save display name" accessibilityRole="button">
               <Text style={styles.saveText}>Save</Text>
             </Pressable>
-            <Pressable onPress={() => setEditing(false)}>
+            <Pressable onPress={() => setEditing(false)} accessibilityLabel="Cancel editing display name" accessibilityRole="button">
               <Text style={styles.cancelText}>Cancel</Text>
             </Pressable>
           </View>
         ) : (
           <Pressable
+            accessibilityLabel="Edit display name"
+            accessibilityRole="button"
             onPress={() => {
               setDisplayName(profile.display_name ?? "");
               setEditing(true);

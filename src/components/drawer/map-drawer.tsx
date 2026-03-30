@@ -29,7 +29,7 @@ export function MapDrawer({ userLatitude, userLongitude }: MapDrawerProps) {
             key={tab}
             onPress={() => { setActiveTab(tab); if (!expanded) setExpanded(true); }}
             style={[styles.tab, activeTab === tab && styles.activeTab]}
-            accessibilityLabel={tab}
+            accessibilityLabel={`${tab} tab`}
             accessibilityRole="tab"
             accessibilityState={{ selected: activeTab === tab }}
           >
