@@ -7,10 +7,10 @@ let changeCallback: ((enabled: boolean) => void) | null = null;
 
 jest.spyOn(AccessibilityInfo, "isReduceMotionEnabled").mockResolvedValue(false);
 jest.spyOn(AccessibilityInfo, "addEventListener").mockImplementation(
-  (_event: string, cb: (enabled: boolean) => void) => {
+  ((_event: any, cb: any) => {
     changeCallback = cb;
-    return { remove: jest.fn() } as any;
-  }
+    return { remove: jest.fn() };
+  }) as any
 );
 
 describe("useReducedMotion", () => {
@@ -19,10 +19,10 @@ describe("useReducedMotion", () => {
     changeCallback = null;
     jest.spyOn(AccessibilityInfo, "isReduceMotionEnabled").mockResolvedValue(false);
     jest.spyOn(AccessibilityInfo, "addEventListener").mockImplementation(
-      (_event: string, cb: (enabled: boolean) => void) => {
+      ((_event: any, cb: any) => {
         changeCallback = cb;
-        return { remove: jest.fn() } as any;
-      }
+        return { remove: jest.fn() };
+      }) as any
     );
   });
 
