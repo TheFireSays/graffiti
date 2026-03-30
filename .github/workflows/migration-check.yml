@@ -1,0 +1,38 @@
+name: Migration Validation
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/config.toml'
+
+jobs:
+  validate-migrations:
+    name: Validate Migrations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase
+        run: supabase start -x imgproxy,edge-runtime,logflare,vector,pgbouncer
+
+      - name: Validate migrations apply cleanly
+        run: supabase db reset
+
+      - name: Check for migration conflicts
+        run: |
+          MIGRATION_COUNT=$(ls -1 supabase/migrations/*.sql 2>/dev/null | wc -l)
+          UNIQUE_PREFIXES=$(ls -1 supabase/migrations/*.sql 2>/dev/null | sed 's/.*\///' | cut -c1-5 | sort -u | wc -l)
+          if [ "$MIGRATION_COUNT" -ne "$UNIQUE_PREFIXES" ]; then
+            echo "::error::Duplicate migration prefixes detected"
+            ls -1 supabase/migrations/*.sql | sed 's/.*\///' | cut -c1-5 | sort | uniq -d
+            exit 1
+          fi
+
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop
