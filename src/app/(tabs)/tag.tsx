@@ -6,6 +6,7 @@ import { useTagStore } from "../../stores/tag-store";
 import { useMapStore } from "../../stores/map-store";
 import { placeTag } from "../../lib/tag-placement";
 import { useAchievementStore } from "../../stores/achievement-store";
+import { trackEvent } from "../../lib/analytics";
 import { CameraViewWithHUD } from "../../components/camera/camera-view";
 import { TagLibrarySheet } from "../../components/camera/tag-library-sheet";
 import { ColorPicker } from "../../components/camera/color-picker";
@@ -58,6 +59,11 @@ export default function TagScreen() {
       setPlacementSuccess(true);
       loadMapData();
       fetchProfile();
+      trackEvent("tag_placed", {
+        tag_image_id: selectedImage.id,
+        xp_earned: result.xpEarned,
+        leveled_up: result.leveledUp,
+      });
       if (result.newlyUnlocked && result.newlyUnlocked.length > 0) {
         useAchievementStore.getState().addNewlyUnlocked(result.newlyUnlocked);
       }
