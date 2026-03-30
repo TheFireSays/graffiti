@@ -10,23 +10,26 @@ create table public.crew_join_requests (
   id uuid primary key default gen_random_uuid(),
   crew_id uuid not null references public.crews(id) on delete cascade,
   user_id uuid not null references public.users(id) on delete cascade,
-  message text,
+  message text check (char_length(message) <= 200),
   status text not null default 'pending' check (status in ('pending', 'approved', 'declined', 'cancelled')),
   reviewed_by uuid references public.users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
-create index idx_crew_join_requests_crew_status
-  on public.crew_join_requests (crew_id, status);
-create index idx_crew_join_requests_user
-  on public.crew_join_requests (user_id, status);
+create unique index idx_join_requests_pending
+  on public.crew_join_requests (user_id, crew_id)
+  where status = 'pending';
+
+create index idx_crew_join_requests_crew_pending
+  on public.crew_join_requests (crew_id, created_at desc)
+  where status = 'pending';
 
 -- Direct invites: OG members invite users by username
 create table public.crew_direct_invites (
   id uuid primary key default gen_random_uuid(),
   crew_id uuid not null references public.crews(id) on delete cascade,
-  inviter_id uuid not null references public.users(id) on delete cascade,
+  invited_by uuid not null references public.users(id) on delete cascade,
   target_user_id uuid not null references public.users(id) on delete cascade,
   status text not null default 'pending' check (status in ('pending', 'accepted', 'declined', 'cancelled', 'expired')),
   expires_at timestamptz not null default (now() + interval '7 days'),
@@ -34,19 +37,21 @@ create table public.crew_direct_invites (
   updated_at timestamptz not null default now()
 );
 
-create index idx_crew_direct_invites_target
-  on public.crew_direct_invites (target_user_id, status);
-create index idx_crew_direct_invites_inviter
-  on public.crew_direct_invites (inviter_id, status);
+create unique index idx_direct_invites_pending
+  on public.crew_direct_invites (target_user_id, crew_id)
+  where status = 'pending';
+
+create index idx_crew_direct_invites_target_pending
+  on public.crew_direct_invites (target_user_id, created_at desc)
+  where status = 'pending';
 
 -- User tag image grants: tracks crew-exclusive tag images granted to users
 create table public.user_tag_image_grants (
-  id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.users(id) on delete cascade,
   tag_image_id uuid not null references public.tag_images(id) on delete cascade,
   crew_id uuid not null references public.crews(id) on delete cascade,
   granted_at timestamptz not null default now(),
-  unique (user_id, tag_image_id)
+  primary key (user_id, tag_image_id)
 );
 
 create index idx_user_tag_image_grants_user
@@ -85,7 +90,7 @@ create policy "Crew members can read crew join requests"
 -- crew_direct_invites: inviter reads own
 create policy "Inviters can read own invites"
   on public.crew_direct_invites for select
-  using (auth.uid() = inviter_id);
+  using (auth.uid() = invited_by);
 
 -- crew_direct_invites: target reads theirs
 create policy "Targets can read own invites"
@@ -129,7 +134,8 @@ begin
   where crew_id = p_crew_id;
 
   -- Compute composite scores for all members
-  -- Score = XP earned (last 14 days approximated by current xp contribution) + (tags placed last 14 days * 10)
+  -- Score = total XP (proxy for 14-day XP; no xp_events table yet) + (tags placed last 14 days * 10)
+  -- TODO: Replace u.xp with delta from xp_events table when available for true 14-day scoring
   -- We use a temp result set with scores
   if v_member_count < 3 then
     -- All members eligible
@@ -416,9 +422,14 @@ begin
   select * into v_crew from public.crews where id = v_user.crew_id;
 
   -- Insert invite
-  insert into public.crew_direct_invites (crew_id, inviter_id, target_user_id)
-  values (v_user.crew_id, v_uid, v_target.id)
-  returning id into v_invite_id;
+  -- Insert invite (unique partial index prevents duplicate pending)
+  begin
+    insert into public.crew_direct_invites (crew_id, invited_by, target_user_id)
+    values (v_user.crew_id, v_uid, v_target.id)
+    returning id into v_invite_id;
+  exception when unique_violation then
+    return jsonb_build_object('success', false, 'error', 'An invite to this user is already pending');
+  end;
 
   -- Notify target
   insert into public.notification_queue (user_id, event_type, title, body, metadata)
@@ -427,7 +438,7 @@ begin
     'crew_direct_invite',
     v_crew.name || ' invited you to join',
     v_crew.name || ' invited you to join',
-    jsonb_build_object('invite_id', v_invite_id, 'crew_id', v_user.crew_id, 'inviter_id', v_uid)
+    jsonb_build_object('invite_id', v_invite_id, 'crew_id', v_user.crew_id, 'invited_by', v_uid)
   );
 
   return jsonb_build_object('success', true, 'invite_id', v_invite_id);
@@ -472,6 +483,11 @@ begin
   select * into v_user from public.users where id = v_uid;
 
   if p_accepted then
+    -- Verify caller is still crewless (race condition guard)
+    if v_user.crew_id is not null then
+      return jsonb_build_object('success', false, 'error', 'Already in a crew');
+    end if;
+
     -- Add to crew_members
     insert into public.crew_members (crew_id, user_id, role)
     values (v_invite.crew_id, v_uid, 'member')
@@ -506,7 +522,7 @@ begin
     -- Notify inviter
     insert into public.notification_queue (user_id, event_type, title, body, metadata)
     values (
-      v_invite.inviter_id,
+      v_invite.invited_by,
       'crew_invite_accepted',
       v_user.username || ' accepted your invite to ' || v_crew.name,
       v_user.username || ' accepted your invite to ' || v_crew.name,
@@ -521,7 +537,7 @@ begin
     -- Notify inviter
     insert into public.notification_queue (user_id, event_type, title, body, metadata)
     values (
-      v_invite.inviter_id,
+      v_invite.invited_by,
       'crew_invite_declined',
       v_user.username || ' declined your invite to ' || v_crew.name,
       v_user.username || ' declined your invite to ' || v_crew.name,

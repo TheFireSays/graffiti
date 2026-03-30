@@ -106,7 +106,7 @@ export type Database = {
           crew_id: string
           expires_at: string
           id: string
-          inviter_id: string
+          invited_by: string
           status: string
           target_user_id: string
           updated_at: string
@@ -116,7 +116,7 @@ export type Database = {
           crew_id: string
           expires_at?: string
           id?: string
-          inviter_id: string
+          invited_by: string
           status?: string
           target_user_id: string
           updated_at?: string
@@ -126,7 +126,7 @@ export type Database = {
           crew_id?: string
           expires_at?: string
           id?: string
-          inviter_id?: string
+          invited_by?: string
           status?: string
           target_user_id?: string
           updated_at?: string
@@ -140,8 +140,8 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "crew_direct_invites_inviter_id_fkey"
-            columns: ["inviter_id"]
+            foreignKeyName: "crew_direct_invites_invited_by_fkey"
+            columns: ["invited_by"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -253,6 +253,8 @@ export type Database = {
           created_at: string
           founder_id: string
           id: string
+          inactivity_warned_at: string | null
+          last_tagged_at: string | null
           member_count: number
           name: string
           total_xp: number
@@ -264,6 +266,8 @@ export type Database = {
           created_at?: string
           founder_id: string
           id?: string
+          inactivity_warned_at?: string | null
+          last_tagged_at?: string | null
           member_count?: number
           name: string
           total_xp?: number
@@ -275,6 +279,8 @@ export type Database = {
           created_at?: string
           founder_id?: string
           id?: string
+          inactivity_warned_at?: string | null
+          last_tagged_at?: string | null
           member_count?: number
           name?: string
           total_xp?: number
@@ -759,21 +765,18 @@ export type Database = {
         Row: {
           crew_id: string
           granted_at: string
-          id: string
           tag_image_id: string
           user_id: string
         }
         Insert: {
           crew_id: string
           granted_at?: string
-          id?: string
           tag_image_id: string
           user_id: string
         }
         Update: {
           crew_id?: string
           granted_at?: string
-          id?: string
           tag_image_id?: string
           user_id?: string
         }
@@ -998,6 +1001,7 @@ export type Database = {
             }
             Returns: Json
           }
+      process_crew_inactivity: { Args: never; Returns: undefined }
       register_push_token: {
         Args: { p_platform: string; p_token: string }
         Returns: Json
