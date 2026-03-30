@@ -5,6 +5,7 @@ import { useAuthStore } from "../../stores/auth-store";
 import { useTagStore } from "../../stores/tag-store";
 import { useMapStore } from "../../stores/map-store";
 import { placeTag } from "../../lib/tag-placement";
+import { useAchievementStore } from "../../stores/achievement-store";
 import { CameraViewWithHUD } from "../../components/camera/camera-view";
 import { TagLibrarySheet } from "../../components/camera/tag-library-sheet";
 import { ColorPicker } from "../../components/camera/color-picker";
@@ -57,6 +58,9 @@ export default function TagScreen() {
       setPlacementSuccess(true);
       loadMapData();
       fetchProfile();
+      if (result.newlyUnlocked && result.newlyUnlocked.length > 0) {
+        useAchievementStore.getState().addNewlyUnlocked(result.newlyUnlocked);
+      }
     } else if ((result as any).queued) {
       setPlacementError("Tag queued — will sync when online");
     } else {

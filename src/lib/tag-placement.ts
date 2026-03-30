@@ -10,6 +10,16 @@ interface PlacementRequest {
   goOverTagId?: string;
 }
 
+interface NewlyUnlockedAchievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  rarity: string;
+  reward_xp: number;
+  reward_spray: number;
+}
+
 interface PlacementResult {
   success: boolean;
   error?: string;
@@ -22,6 +32,7 @@ interface PlacementResult {
   newLevel?: number;
   newSprayCans?: number;
   leveledUp?: boolean;
+  newlyUnlocked?: NewlyUnlockedAchievement[];
 }
 
 function isNetworkError(error?: string): boolean {
@@ -60,6 +71,7 @@ export async function placeTagDirect(req: PlacementRequest): Promise<PlacementRe
     newLevel: result.new_level,
     newSprayCans: result.new_spray_cans,
     leveledUp: result.leveled_up,
+    newlyUnlocked: result.newly_unlocked ?? [],
   };
 }
 

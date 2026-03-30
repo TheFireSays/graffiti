@@ -9,6 +9,7 @@ import { useNotifications } from "../hooks/use-notifications";
 import { NotificationListener } from "../components/notifications/notification-listener";
 import { ErrorBoundary } from "../components/error-boundary";
 import { SyncToast } from "../components/offline/sync-toast";
+import { AchievementToast } from "../components/achievements/achievement-toast";
 import { useOfflineSync } from "../hooks/use-offline-sync";
 import { initErrorReporting } from "../lib/error-reporting";
 
@@ -87,6 +88,7 @@ export default function RootLayout() {
       <StatusBar style="light" />
       <NotificationListener />
       <Slot />
+      <AchievementToast />
       <SyncToast />
     </ErrorBoundary>
   );
