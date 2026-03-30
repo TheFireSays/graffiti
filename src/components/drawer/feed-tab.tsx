@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
 import { supabase } from "../../lib/supabase";
 import { useRealtime } from "../../hooks/use-realtime";
 import { DEMO_MODE } from "../../lib/config";
 import { mockActivityFeed } from "../../lib/mock-data";
+import { useMapStore } from "../../stores/map-store";
 
 interface FeedEvent {
   id: string;
@@ -11,6 +12,7 @@ interface FeedEvent {
   actorUsername: string;
   crewName: string | null;
   zoneName: string | null;
+  zoneId: string | null;
   createdAt: string;
 }
 
@@ -27,6 +29,7 @@ export function FeedTab() {
           actorUsername: e.actor_username,
           crewName: e.crew_name,
           zoneName: e.zone_name,
+          zoneId: e.zone_id ?? null,
           createdAt: e.created_at,
         })));
         setLoading(false);
@@ -53,6 +56,7 @@ export function FeedTab() {
             actorUsername: row.actor?.username ?? "Unknown",
             crewName: row.crew?.name ?? null,
             zoneName: row.zone?.name ?? null,
+            zoneId: row.zone_id ?? null,
             createdAt: row.created_at,
           }))
         );
@@ -88,6 +92,7 @@ export function FeedTab() {
         actorUsername: (data as any).actor?.username ?? "Unknown",
         crewName: (data as any).crew?.name ?? null,
         zoneName: (data as any).zone?.name ?? null,
+        zoneId: (data as any).zone_id ?? null,
         createdAt: data.created_at,
       };
       setEvents((prev) => [newEvent, ...prev].slice(0, 50));
@@ -100,6 +105,10 @@ export function FeedTab() {
     onEvent: handleNewEvent,
   });
 
+  const zones = useMapStore((s) => s.zones);
+  const selectZone = useMapStore((s) => s.selectZone);
+  const selectedZone = useMapStore((s) => s.selectedZone);
+
   if (loading) {
     return <Text style={styles.empty}>Loading feed...</Text>;
   }
@@ -108,22 +117,45 @@ export function FeedTab() {
     <FlatList
       data={events}
       keyExtractor={(item) => item.id}
-      renderItem={({ item }) => <FeedItem event={item} />}
+      renderItem={({ item }) => (
+        <FeedItem
+          event={item}
+          isSelected={!!item.zoneId && selectedZone?.id === item.zoneId}
+          onPress={() => {
+            if (!item.zoneId) return;
+            const zone = zones.find((z) => z.id === item.zoneId);
+            if (zone) selectZone(zone);
+          }}
+        />
+      )}
       ListEmptyComponent={<Text style={styles.empty}>No activity yet</Text>}
       contentContainerStyle={styles.list}
     />
   );
 }
 
-function FeedItem({ event }: { event: FeedEvent }) {
+function FeedItem({
+  event,
+  isSelected,
+  onPress,
+}: {
+  event: FeedEvent;
+  isSelected: boolean;
+  onPress: () => void;
+}) {
   return (
-    <View style={styles.item}>
+    <Pressable
+      style={[styles.item, isSelected && styles.itemSelected]}
+      onPress={onPress}
+      disabled={!event.zoneId}
+    >
       <Text style={styles.eventIcon}>{getEventIcon(event.eventType)}</Text>
       <View style={styles.itemText}>
         <Text style={styles.eventDescription}>{formatEvent(event)}</Text>
         <Text style={styles.eventTime}>{getTimeAgo(event.createdAt)}</Text>
       </View>
-    </View>
+      {event.zoneId && <Text style={styles.tapHint}>›</Text>}
+    </Pressable>
   );
 }
 
@@ -166,10 +198,12 @@ function getTimeAgo(dateString: string): string {
 
 const styles = StyleSheet.create({
   list: { paddingVertical: 8 },
-  item: { flexDirection: "row", alignItems: "flex-start", gap: 12, paddingVertical: 10, paddingHorizontal: 16 },
-  eventIcon: { color: "#4ecdc4", fontSize: 14, fontWeight: "bold", width: 20, textAlign: "center", marginTop: 2 },
+  item: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10, paddingHorizontal: 16 },
+  itemSelected: { backgroundColor: "rgba(78,205,196,0.12)", borderLeftWidth: 3, borderLeftColor: "#4ecdc4" },
+  eventIcon: { color: "#4ecdc4", fontSize: 14, fontWeight: "bold", width: 20, textAlign: "center" },
   itemText: { flex: 1 },
   eventDescription: { color: "#fff", fontSize: 14 },
   eventTime: { color: "#666", fontSize: 12, marginTop: 2 },
+  tapHint: { color: "#4ecdc4", fontSize: 18, marginLeft: 4 },
   empty: { color: "#666", textAlign: "center", paddingVertical: 24, fontSize: 14 },
 });

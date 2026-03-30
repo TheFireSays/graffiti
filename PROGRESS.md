@@ -326,6 +326,11 @@
 - [x] Phase 7: README demo section
 - [x] Verification — 152 tests, 0 type errors, 0 lint errors
 
+### Session C Bugfixes (2026-03-30)
+- [x] Fix React hooks ordering in FeedTab — `useMapStore` calls were after early return, violating Rules of Hooks
+- [x] Leaflet interactive map upgrade — replaced static zone cards with real Leaflet tile map (dark CARTO tiles, clickable zones, tag markers)
+- [x] Package updates — added leaflet dependency
+
 ---
 
 ## Notes / Errors

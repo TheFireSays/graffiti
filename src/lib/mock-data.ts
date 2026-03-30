@@ -63,7 +63,7 @@ export const mockTags = [
 
 export const mockZones = [
   {
-    id: "z1", name: "6th Street", controllingCrewId: "c1000000-0000-0000-0000-000000000001", controllingCrewColor: "#FF4136", controllingCrewAbbreviation: "KOA",
+    id: "z1", name: "6th Street", controllingCrewId: "c1000000-0000-0000-0000-000000000001", controllingCrewColor: "#FF4136", controllingCrewAbbreviation: "KOA", tagCounts: { "c1000000-0000-0000-0000-000000000001": 14, "c2": 6 },
     coordinates: [
       { latitude: 30.2680, longitude: -97.7450 },
       { latitude: 30.2680, longitude: -97.7420 },
@@ -72,7 +72,7 @@ export const mockZones = [
     ],
   },
   {
-    id: "z2", name: "Rainey Street", controllingCrewId: "c2", controllingCrewColor: "#0074D9", controllingCrewAbbreviation: "SHW",
+    id: "z2", name: "Rainey Street", controllingCrewId: "c2", controllingCrewColor: "#0074D9", controllingCrewAbbreviation: "SHW", tagCounts: { "c2": 11, "c3": 4 },
     coordinates: [
       { latitude: 30.2660, longitude: -97.7420 },
       { latitude: 30.2660, longitude: -97.7400 },
@@ -81,7 +81,7 @@ export const mockZones = [
     ],
   },
   {
-    id: "z3", name: "Congress Ave", controllingCrewId: "c1000000-0000-0000-0000-000000000001", controllingCrewColor: "#FF4136", controllingCrewAbbreviation: "KOA",
+    id: "z3", name: "Congress Ave", controllingCrewId: "c1000000-0000-0000-0000-000000000001", controllingCrewColor: "#FF4136", controllingCrewAbbreviation: "KOA", tagCounts: { "c1000000-0000-0000-0000-000000000001": 9, "c2": 3, "c3": 2 },
     coordinates: [
       { latitude: 30.2660, longitude: -97.7450 },
       { latitude: 30.2660, longitude: -97.7430 },
@@ -90,7 +90,7 @@ export const mockZones = [
     ],
   },
   {
-    id: "z4", name: "East Side", controllingCrewId: null, controllingCrewColor: null, controllingCrewAbbreviation: null,
+    id: "z4", name: "East Side", controllingCrewId: null, controllingCrewColor: null, controllingCrewAbbreviation: null, tagCounts: {},
     coordinates: [
       { latitude: 30.2710, longitude: -97.7470 },
       { latitude: 30.2710, longitude: -97.7450 },
@@ -99,7 +99,7 @@ export const mockZones = [
     ],
   },
   {
-    id: "z5", name: "SoCo", controllingCrewId: "c3", controllingCrewColor: "#B10DC9", controllingCrewAbbreviation: "NXT",
+    id: "z5", name: "SoCo", controllingCrewId: "c3", controllingCrewColor: "#B10DC9", controllingCrewAbbreviation: "NXT", tagCounts: { "c3": 8, "c1000000-0000-0000-0000-000000000001": 2 },
     coordinates: [
       { latitude: 30.2640, longitude: -97.7470 },
       { latitude: 30.2640, longitude: -97.7450 },
