@@ -35,10 +35,54 @@ interface CrewInfo {
   createdAt: string;
 }
 
+interface JoinRequest {
+  id: string;
+  userId: string;
+  username: string;
+  message: string | null;
+  status: string;
+  createdAt: string;
+}
+
+interface DirectInvite {
+  id: string;
+  crewId: string;
+  targetUsername: string;
+  status: string;
+  expiresAt: string;
+  createdAt: string;
+}
+
+interface PendingIncomingInvite {
+  id: string;
+  crewId: string;
+  crewName: string;
+  crewAbbreviation: string;
+  crewColor: string;
+  invitedByUsername: string;
+  expiresAt: string;
+  createdAt: string;
+}
+
+interface PendingOutgoingRequest {
+  id: string;
+  crewId: string;
+  crewName: string;
+  crewAbbreviation: string;
+  crewColor: string;
+  message: string | null;
+  status: string;
+  createdAt: string;
+}
+
 interface CrewState {
   crew: CrewInfo | null;
   members: CrewMember[];
   invites: CrewInvite[];
+  joinRequests: JoinRequest[];
+  directInvites: DirectInvite[];
+  pendingIncomingInvites: PendingIncomingInvite[];
+  pendingOutgoingRequests: PendingOutgoingRequest[];
   userRole: string | null;
   isLoading: boolean;
   error: string | null;
@@ -51,14 +95,26 @@ interface CrewState {
   createInvite: (crewId: string, userId: string, maxUses: number) => Promise<{ success: boolean; code?: string; error?: string }>;
   leaveCrew: () => Promise<{ success: boolean; error?: string }>;
   clearCrew: () => void;
+  requestJoinCrew: (crewId: string, message?: string) => Promise<{ success: boolean; error?: string }>;
+  cancelJoinRequest: (requestId: string) => Promise<{ success: boolean; error?: string }>;
+  reviewJoinRequest: (requestId: string, approved: boolean) => Promise<{ success: boolean; error?: string }>;
+  sendDirectInvite: (targetUsername: string) => Promise<{ success: boolean; error?: string }>;
+  respondDirectInvite: (inviteId: string, accepted: boolean) => Promise<{ success: boolean; error?: string }>;
+  loadJoinRequests: (crewId: string) => Promise<void>;
+  loadDirectInvites: (crewId: string) => Promise<void>;
+  loadPendingMemberships: (userId: string) => Promise<void>;
 }
 
-export type { CrewInfo, CrewMember, CrewInvite };
+export type { CrewInfo, CrewMember, CrewInvite, JoinRequest, DirectInvite, PendingIncomingInvite, PendingOutgoingRequest };
 
 export const useCrewStore = create<CrewState>((set, get) => ({
   crew: null,
   members: [],
   invites: [],
+  joinRequests: [],
+  directInvites: [],
+  pendingIncomingInvites: [],
+  pendingOutgoingRequests: [],
   userRole: null,
   isLoading: false,
   error: null,
@@ -268,6 +324,167 @@ export const useCrewStore = create<CrewState>((set, get) => ({
   },
 
   clearCrew: () => {
-    set({ crew: null, members: [], invites: [], userRole: null, error: null });
+    set({
+      crew: null,
+      members: [],
+      invites: [],
+      joinRequests: [],
+      directInvites: [],
+      pendingIncomingInvites: [],
+      pendingOutgoingRequests: [],
+      userRole: null,
+      error: null,
+    });
+  },
+
+  requestJoinCrew: async (crewId, message) => {
+    const { data, error } = await supabase.rpc("request_join_crew", {
+      p_crew_id: crewId,
+      p_message: message ?? null,
+    });
+    if (error) return { success: false, error: error.message };
+    const result = data as any;
+    if (!result.success) return { success: false, error: result.error };
+    return { success: true };
+  },
+
+  cancelJoinRequest: async (requestId) => {
+    const { data, error } = await supabase.rpc("cancel_join_request", {
+      p_request_id: requestId,
+    });
+    if (error) return { success: false, error: error.message };
+    const result = data as any;
+    if (!result.success) return { success: false, error: result.error };
+    return { success: true };
+  },
+
+  reviewJoinRequest: async (requestId, approved) => {
+    const { data, error } = await supabase.rpc("review_join_request", {
+      p_request_id: requestId,
+      p_approved: approved,
+    });
+    if (error) return { success: false, error: error.message };
+    const result = data as any;
+    if (!result.success) return { success: false, error: result.error };
+    return { success: true };
+  },
+
+  sendDirectInvite: async (targetUsername) => {
+    const { data, error } = await supabase.rpc("send_direct_invite", {
+      p_target_username: targetUsername,
+    });
+    if (error) return { success: false, error: error.message };
+    const result = data as any;
+    if (!result.success) return { success: false, error: result.error };
+    return { success: true };
+  },
+
+  respondDirectInvite: async (inviteId, accepted) => {
+    const { data, error } = await supabase.rpc("respond_direct_invite", {
+      p_invite_id: inviteId,
+      p_accepted: accepted,
+    });
+    if (error) return { success: false, error: error.message };
+    const result = data as any;
+    if (!result.success) return { success: false, error: result.error };
+    return { success: true };
+  },
+
+  loadJoinRequests: async (crewId) => {
+    const { data, error } = await supabase
+      .from("crew_join_requests")
+      .select(
+        `id, user_id, message, status, created_at, user:users!crew_join_requests_user_id_fkey(username)`
+      )
+      .eq("crew_id", crewId)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      set({
+        joinRequests: data.map((row: any) => ({
+          id: row.id,
+          userId: row.user_id,
+          username: row.user?.username ?? "Unknown",
+          message: row.message,
+          status: row.status,
+          createdAt: row.created_at,
+        })),
+      });
+    }
+  },
+
+  loadDirectInvites: async (crewId) => {
+    const { data, error } = await supabase
+      .from("crew_direct_invites")
+      .select(
+        `id, crew_id, target_user_id, status, expires_at, created_at, target:users!crew_direct_invites_target_user_id_fkey(username)`
+      )
+      .eq("crew_id", crewId)
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      set({
+        directInvites: data.map((row: any) => ({
+          id: row.id,
+          crewId: row.crew_id,
+          targetUsername: row.target?.username ?? "Unknown",
+          status: row.status,
+          expiresAt: row.expires_at,
+          createdAt: row.created_at,
+        })),
+      });
+    }
+  },
+
+  loadPendingMemberships: async (userId) => {
+    // Incoming direct invites
+    const { data: inviteData, error: inviteError } = await supabase
+      .from("crew_direct_invites")
+      .select(
+        `id, crew_id, expires_at, created_at, crew:crews!crew_direct_invites_crew_id_fkey(name, abbreviation, color), inviter:users!crew_direct_invites_invited_by_fkey(username)`
+      )
+      .eq("target_user_id", userId)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false });
+
+    // Outgoing join requests
+    const { data: requestData, error: requestError } = await supabase
+      .from("crew_join_requests")
+      .select(
+        `id, crew_id, message, status, created_at, crew:crews!crew_join_requests_crew_id_fkey(name, abbreviation, color)`
+      )
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    const pendingIncomingInvites =
+      !inviteError && inviteData
+        ? inviteData.map((row: any) => ({
+            id: row.id,
+            crewId: row.crew_id,
+            crewName: row.crew?.name ?? "Unknown",
+            crewAbbreviation: row.crew?.abbreviation ?? "",
+            crewColor: row.crew?.color ?? "#888888",
+            invitedByUsername: row.inviter?.username ?? "Unknown",
+            expiresAt: row.expires_at,
+            createdAt: row.created_at,
+          }))
+        : [];
+
+    const pendingOutgoingRequests =
+      !requestError && requestData
+        ? requestData.map((row: any) => ({
+            id: row.id,
+            crewId: row.crew_id,
+            crewName: row.crew?.name ?? "Unknown",
+            crewAbbreviation: row.crew?.abbreviation ?? "",
+            crewColor: row.crew?.color ?? "#888888",
+            message: row.message,
+            status: row.status,
+            createdAt: row.created_at,
+          }))
+        : [];
+
+    set({ pendingIncomingInvites, pendingOutgoingRequests });
   },
 }));
