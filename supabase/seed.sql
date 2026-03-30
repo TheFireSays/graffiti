@@ -117,3 +117,18 @@ insert into public.activity_feed (event_type, actor_id, crew_id, zone_id, locati
   ('tag_gone_over', 'a1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', 'd1000000-0000-0000-0000-000000000001', ST_GeogFromText('POINT(-97.7440 30.2670)'), '{"original_user": "a1000000-0000-0000-0000-000000000004", "original_crew": "c1000000-0000-0000-0000-000000000002"}'::jsonb),
   ('crew_joined', 'a1000000-0000-0000-0000-000000000004', 'c1000000-0000-0000-0000-000000000002', null, null, '{"crew_name": "Shadow Writers"}'::jsonb),
   ('level_up', 'a1000000-0000-0000-0000-000000000003', 'c1000000-0000-0000-0000-000000000002', null, null, '{"new_level": 15}'::jsonb);
+
+-- Missions: 3 daily + 1 weekly
+insert into public.missions (id, title, description, type, requirements, reward_xp, reward_spray, starts_at, expires_at) values
+  ('b1000000-0000-0000-0000-000000000001', 'Tag 3 Spots', 'Place 3 tags anywhere in the city.', 'daily',
+    '{"action": "place_tags", "count": 3}'::jsonb, 50, 0,
+    now() - interval '1 hour', now() + interval '23 hours'),
+  ('b1000000-0000-0000-0000-000000000002', 'Zone Raider', 'Flip 2 zones to your crew''s control.', 'daily',
+    '{"action": "zone_flip", "count": 2}'::jsonb, 75, 1,
+    now() - interval '1 hour', now() + interval '23 hours'),
+  ('b1000000-0000-0000-0000-000000000003', 'Tag Blitz', 'Drop 10 tags in a single day. Go hard.', 'daily',
+    '{"action": "place_tags", "count": 10}'::jsonb, 150, 2,
+    now() - interval '1 hour', now() + interval '23 hours'),
+  ('b1000000-0000-0000-0000-000000000004', 'Zone Dominator', 'Flip 10 zones this week. Show them who runs this city.', 'weekly',
+    '{"action": "zone_flip", "count": 10}'::jsonb, 500, 5,
+    now() - interval '1 day', now() + interval '6 days');
