@@ -1,9 +1,15 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { trackEvent } from "../../lib/analytics";
 
 export default function TabLayout() {
   return (
     <Tabs
+      screenListeners={{
+        tabPress: (e) => {
+          trackEvent("screen_viewed", { screen: e.target?.split("-")[0] ?? "unknown" });
+        },
+      }}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: "#4ecdc4",

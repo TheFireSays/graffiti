@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator } from "react-native";
 import { useMissionStore, Mission } from "../../stores/mission-store";
 import { useAuthStore } from "../../stores/auth-store";
+import { trackEvent } from "../../lib/analytics";
 
 function MissionCard({ mission, onClaim }: { mission: Mission; onClaim: (id: string) => void }) {
   const required = mission.requirements.count;
@@ -57,7 +58,12 @@ export function MissionsTab() {
   }, [userId]);
 
   const handleClaim = async (missionId: string) => {
-    if (userId) await claimReward(userId, missionId);
+    if (userId) {
+      const result = await claimReward(userId, missionId);
+      if (!result.error) {
+        trackEvent("mission_completed", { mission_id: missionId });
+      }
+    }
   };
 
   if (isLoading) {
