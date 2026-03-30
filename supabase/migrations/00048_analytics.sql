@@ -23,7 +23,7 @@ create policy "Users can insert own analytics events"
 create policy "Admins can read all analytics events"
   on public.analytics_events for select
   to authenticated
-  using (is_admin(auth.uid()));
+  using (public.is_admin());
 
 -- ============================================================
 -- Analytics RPCs (admin-only reads)
@@ -35,7 +35,7 @@ returns integer language plpgsql security definer as $$
 declare
   v_count integer;
 begin
-  if not is_admin(auth.uid()) then
+  if not public.is_admin() then
     raise exception 'Admin access required';
   end if;
 
@@ -57,7 +57,7 @@ create or replace function get_event_counts(
 declare
   v_count integer;
 begin
-  if not is_admin(auth.uid()) then
+  if not public.is_admin() then
     raise exception 'Admin access required';
   end if;
 
@@ -82,7 +82,7 @@ declare
   v_d7 integer;
   v_d30 integer;
 begin
-  if not is_admin(auth.uid()) then
+  if not public.is_admin() then
     raise exception 'Admin access required';
   end if;
 

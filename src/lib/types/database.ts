@@ -141,6 +141,41 @@ export type Database = {
           },
         ]
       }
+      analytics_events: {
+        Row: {
+          created_at: string | null
+          event_data: Json | null
+          event_name: string
+          id: string
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_data?: Json | null
+          event_name: string
+          id?: string
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_data?: Json | null
+          event_name?: string
+          id?: string
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crew_members: {
         Row: {
           crew_id: string
@@ -967,6 +1002,11 @@ export type Database = {
       }
       get_active_season: { Args: never; Returns: Json }
       get_constant: { Args: { p_key: string }; Returns: number }
+      get_daily_active_users: { Args: { p_date: string }; Returns: number }
+      get_event_counts: {
+        Args: { p_end: string; p_event_name: string; p_start: string }
+        Returns: number
+      }
       get_pending_reports: {
         Args: never
         Returns: {
@@ -980,6 +1020,10 @@ export type Database = {
           tag_image_id: string
           tag_user_username: string
         }[]
+      }
+      get_retention_cohort: {
+        Args: { p_end: string; p_start: string }
+        Returns: Json
       }
       get_season_leaderboard: {
         Args: { p_season_id: string }
