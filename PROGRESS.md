@@ -313,6 +313,57 @@
 
 ---
 
+## CC Directive A — Phase 1: Merge Branches (Complete)
+
+- [x] Step 1: Merged dev/ui-polish into dev/scaffolding (fast-forward)
+- [x] Step 2: Merged dev/ci-pipeline into dev/scaffolding (merge commit)
+- [x] Step 3: Verification — db reset clean (38 migrations), 152 tests, 0 type errors, 0 lint errors
+- [x] Step 4: Pushed to remote
+
+---
+
+## CC Directive A — Phase 3: Mission System (Complete)
+
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-30-missions.md`
+
+- [x] Task 1: Missions schema migration (00040) — tables + RLS + realtime
+- [x] Task 2: Mission RPCs (00042) — get_active_missions, check_mission_progress, claim_mission_reward
+- [x] Task 3: Mission triggers (00043) — auto-check after tag insert and zone flip
+- [x] Task 4: Seed data — 3 daily + 1 weekly mission
+- [x] Task 5: Mission store (Zustand) — load, claim, clear
+- [x] Task 6: Regenerated database types
+- [x] Task 7: MissionsTab UI — mission cards with progress bars, rewards, claim button
+- [x] Task 9: Tests — 6 store tests + 5 RPC tests (11 new, 173 total)
+- [x] Task 10: Verification — db reset clean, 0 type errors, 173 tests, 0 lint errors
+- [x] Pushed to remote
+
+---
+
+## CC Directive A — Phase 2: Deploy to Supabase Cloud (Complete)
+
+- [x] Supabase login + link successful
+- [x] Pushed 2 new migrations (00037_seasons_schema, 00038_season_aware_scoring) to production
+- [x] All 38 migrations now applied in production
+
+---
+
+## Session B — Phase 2: Achievements & Badges System (Complete)
+
+**Branch:** `dev/features-b`
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-30-achievements.md`
+
+- [x] Task 1: Achievements schema migration (00039) — tables, RLS, seed 16 achievements, check_achievements + get_user_achievements RPCs
+- [x] Task 2: Wire check_achievements into place_tag_scored, create_crew, join_crew (00041)
+- [x] Task 3: Regenerated database types
+- [x] Task 4: Achievement store (Zustand) — load, addNewlyUnlocked, clearNewlyUnlocked
+- [x] Task 5: Achievement components — AchievementCard, AchievementsList, AchievementToast
+- [x] Task 6: Wire achievements into profile screen with count header
+- [x] Task 7: Wire achievement toast into app layout + tag placement flow
+- [x] Task 8: Tests — 6 store + 3 integration + 3 component (12 new tests)
+- [x] Task 9: Verification — 176 tests, 0 type errors, 0 lint errors
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
