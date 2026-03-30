@@ -34,71 +34,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      activity_feed: {
-        Row: {
-          actor_id: string
-          created_at: string
-          crew_id: string | null
-          event_type: string
-          id: string
-          location: unknown
-          metadata: Json
-          tag_id: string | null
-          zone_id: string | null
-        }
-        Insert: {
-          actor_id: string
-          created_at?: string
-          crew_id?: string | null
-          event_type: string
-          id?: string
-          location?: unknown
-          metadata?: Json
-          tag_id?: string | null
-          zone_id?: string | null
-        }
-        Update: {
-          actor_id?: string
-          created_at?: string
-          crew_id?: string | null
-          event_type?: string
-          id?: string
-          location?: unknown
-          metadata?: Json
-          tag_id?: string | null
-          zone_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "activity_feed_actor_id_fkey"
-            columns: ["actor_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "activity_feed_crew_id_fkey"
-            columns: ["crew_id"]
-            isOneToOne: false
-            referencedRelation: "crews"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "activity_feed_tag_id_fkey"
-            columns: ["tag_id"]
-            isOneToOne: false
-            referencedRelation: "tags"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "activity_feed_zone_id_fkey"
-            columns: ["zone_id"]
-            isOneToOne: false
-            referencedRelation: "zones"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       crew_members: {
         Row: {
           crew_id: string
@@ -179,24 +114,6 @@ export type Database = {
           },
         ]
       }
-      game_constants: {
-        Row: {
-          description: string | null
-          key: string
-          value: number
-        }
-        Insert: {
-          description?: string | null
-          key: string
-          value: number
-        }
-        Update: {
-          description?: string | null
-          key?: string
-          value?: number
-        }
-        Relationships: []
-      }
       invites: {
         Row: {
           code: string
@@ -241,82 +158,6 @@ export type Database = {
             columns: ["crew_id"]
             isOneToOne: false
             referencedRelation: "crews"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      notification_queue: {
-        Row: {
-          body: string
-          created_at: string
-          event_type: string
-          id: string
-          is_read: boolean
-          metadata: Json
-          title: string
-          user_id: string
-        }
-        Insert: {
-          body: string
-          created_at?: string
-          event_type: string
-          id?: string
-          is_read?: boolean
-          metadata?: Json
-          title: string
-          user_id: string
-        }
-        Update: {
-          body?: string
-          created_at?: string
-          event_type?: string
-          id?: string
-          is_read?: boolean
-          metadata?: Json
-          title?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notification_queue_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      push_tokens: {
-        Row: {
-          created_at: string
-          device_fingerprint: string | null
-          id: string
-          platform: string
-          token: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          device_fingerprint?: string | null
-          id?: string
-          platform: string
-          token: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          device_fingerprint?: string | null
-          id?: string
-          platform?: string
-          token?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "push_tokens_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -408,116 +249,6 @@ export type Database = {
           source?: string
         }
         Relationships: []
-      }
-      season_leaderboard: {
-        Row: {
-          crew_id: string
-          rank: number | null
-          season_id: string
-          tags_gone_over: number
-          tags_placed: number
-          total_xp: number
-          zones_held: number
-        }
-        Insert: {
-          crew_id: string
-          rank?: number | null
-          season_id: string
-          tags_gone_over?: number
-          tags_placed?: number
-          total_xp?: number
-          zones_held?: number
-        }
-        Update: {
-          crew_id?: string
-          rank?: number | null
-          season_id?: string
-          tags_gone_over?: number
-          tags_placed?: number
-          total_xp?: number
-          zones_held?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "season_leaderboard_crew_id_fkey"
-            columns: ["crew_id"]
-            isOneToOne: false
-            referencedRelation: "crews"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "season_leaderboard_season_id_fkey"
-            columns: ["season_id"]
-            isOneToOne: false
-            referencedRelation: "seasons"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      seasons: {
-        Row: {
-          config: Json
-          created_at: string
-          ends_at: string
-          id: string
-          name: string
-          starts_at: string
-          status: string
-        }
-        Insert: {
-          config?: Json
-          created_at?: string
-          ends_at: string
-          id?: string
-          name: string
-          starts_at: string
-          status?: string
-        }
-        Update: {
-          config?: Json
-          created_at?: string
-          ends_at?: string
-          id?: string
-          name?: string
-          starts_at?: string
-          status?: string
-        }
-        Relationships: []
-      }
-      suspicious_activity: {
-        Row: {
-          created_at: string
-          id: string
-          metadata: Json
-          reason: string
-          reviewed: boolean
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          metadata?: Json
-          reason: string
-          reviewed?: boolean
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          metadata?: Json
-          reason?: string
-          reviewed?: boolean
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "suspicious_activity_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       tag_images: {
         Row: {
@@ -641,7 +372,6 @@ export type Database = {
           display_name: string
           id: string
           is_banned: boolean
-          last_tagged_at: string | null
           level: number
           spray_cans: number
           username: string
@@ -654,7 +384,6 @@ export type Database = {
           display_name?: string
           id: string
           is_banned?: boolean
-          last_tagged_at?: string | null
           level?: number
           spray_cans?: number
           username: string
@@ -667,7 +396,6 @@ export type Database = {
           display_name?: string
           id?: string
           is_banned?: boolean
-          last_tagged_at?: string | null
           level?: number
           spray_cans?: number
           username?: string
@@ -734,36 +462,12 @@ export type Database = {
           zone_name: string
         }[]
       }
-      create_crew: {
-        Args: { p_abbreviation: string; p_color: string; p_name: string }
-        Returns: Json
-      }
       decay_expired_tags: { Args: never; Returns: Json }
-      delete_account: { Args: never; Returns: Json }
       find_zone_for_point: {
         Args: { p_lat: number; p_lng: number }
         Returns: string
       }
-      flag_suspicious_activity: {
-        Args: { p_metadata?: Json; p_reason: string; p_user_id: string }
-        Returns: undefined
-      }
-      get_active_season: { Args: never; Returns: Json }
       get_constant: { Args: { p_key: string }; Returns: number }
-      get_season_leaderboard: {
-        Args: { p_season_id: string }
-        Returns: {
-          crew_abbreviation: string
-          crew_color: string
-          crew_id: string
-          crew_name: string
-          rank: number
-          tags_gone_over: number
-          tags_placed: number
-          total_xp: number
-          zones_held: number
-        }[]
-      }
       get_tags_for_map: {
         Args: never
         Returns: {
@@ -782,7 +486,6 @@ export type Database = {
           username: string
         }[]
       }
-      get_unread_notification_count: { Args: never; Returns: number }
       get_zones_for_map: {
         Args: never
         Returns: {
@@ -795,66 +498,17 @@ export type Database = {
           tag_counts: Json
         }[]
       }
-      join_crew: { Args: { p_invite_code: string }; Returns: Json }
-      leave_crew: { Args: never; Returns: Json }
-      mark_notifications_read: {
-        Args: { p_notification_ids: string[] }
-        Returns: Json
-      }
-      place_tag_scored:
-        | {
-            Args: {
-              p_compass_heading: number
-              p_custom_colors: Json
-              p_go_over_tag_id?: string
-              p_lat: number
-              p_lng: number
-              p_tag_image_id: string
-            }
-            Returns: Json
-          }
-        | {
-            Args: {
-              p_compass_heading: number
-              p_custom_colors: Json
-              p_go_over_tag_id?: string
-              p_lat: number
-              p_lng: number
-              p_tag_image_id: string
-              p_user_id: string
-            }
-            Returns: Json
-          }
-      register_push_token: {
-        Args: { p_platform: string; p_token: string }
-        Returns: Json
-      }
-      report_tag: {
-        Args: { p_details?: string; p_reason: string; p_tag_id: string }
-        Returns: Json
-      }
-      review_report: {
-        Args: { p_action: string; p_report_id: string }
-        Returns: Json
-      }
-      unregister_push_token: { Args: { p_token: string }; Returns: Json }
-      update_profile: {
+      place_tag_scored: {
         Args: {
-          p_avatar_url?: string
-          p_display_name?: string
-          p_username?: string
+          p_compass_heading: number
+          p_custom_colors: Json
+          p_go_over_tag_id?: string
+          p_lat: number
+          p_lng: number
+          p_tag_image_id: string
+          p_user_id: string
         }
         Returns: Json
-      }
-      update_season_stats: {
-        Args: {
-          p_crew_id: string
-          p_go_over_delta?: number
-          p_tags_delta?: number
-          p_xp_delta?: number
-          p_zones_delta?: number
-        }
-        Returns: undefined
       }
     }
     Enums: {
