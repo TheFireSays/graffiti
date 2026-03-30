@@ -1,6 +1,10 @@
-import * as Sentry from "@sentry/react-native";
+import { Platform } from "react-native";
 
 const IS_DEV = __DEV__;
+const IS_WEB = Platform.OS === "web";
+
+// Only import Sentry on native platforms
+const Sentry = IS_WEB ? null : require("@sentry/react-native");
 
 /**
  * Initialize Sentry for error reporting.
@@ -15,6 +19,7 @@ export function initErrorReporting() {
     return;
   }
 
+  if (!Sentry) return;
   Sentry.init({
     dsn,
     debug: IS_DEV,
@@ -33,8 +38,9 @@ export function reportError(error: unknown, context?: Record<string, string>) {
     return;
   }
 
+  if (!Sentry) return;
   if (context) {
-    Sentry.withScope((scope) => {
+    Sentry.withScope((scope: any) => {
       for (const [key, value] of Object.entries(context)) {
         scope.setExtra(key, value);
       }
@@ -54,5 +60,6 @@ export function reportMessage(message: string, level: "info" | "warning" | "erro
     return;
   }
 
+  if (!Sentry) return;
   Sentry.captureMessage(message, level);
 }

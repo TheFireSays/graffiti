@@ -1,19 +1,23 @@
 import { useEffect, useRef } from "react";
 import { Platform } from "react-native";
-import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import { useNotificationStore } from "../stores/notification-store";
 import { useAuthStore } from "../stores/auth-store";
+import { DEMO_MODE } from "../lib/config";
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+// Only set up notification handler on native
+if (Platform.OS !== "web") {
+  const Notifications = require("expo-notifications");
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+}
 
 export function useNotifications() {
   const router = useRouter();
@@ -23,10 +27,12 @@ export function useNotifications() {
     (s) => s.setPermissionStatus
   );
   const fetchUnreadCount = useNotificationStore((s) => s.fetchUnreadCount);
-  const responseListener = useRef<Notifications.Subscription | null>(null);
+  const responseListener = useRef<any>(null);
 
   useEffect(() => {
-    if (!session) return;
+    if (!session || DEMO_MODE) return;
+
+    const Notifications = require("expo-notifications");
 
     async function setup() {
       const { status: existingStatus } =
@@ -53,8 +59,11 @@ export function useNotifications() {
   }, [session, registerToken, setPermissionStatus, fetchUnreadCount]);
 
   useEffect(() => {
+    if (DEMO_MODE) return;
+
+    const Notifications = require("expo-notifications");
     responseListener.current =
-      Notifications.addNotificationResponseReceivedListener((response) => {
+      Notifications.addNotificationResponseReceivedListener((response: any) => {
         const data = response.notification.request.content.data;
 
         if (data?.zone_id) {

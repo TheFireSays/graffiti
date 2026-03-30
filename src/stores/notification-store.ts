@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { supabase } from "../lib/supabase";
+import { DEMO_MODE } from "../lib/config";
 
 interface Notification {
   id: string;
@@ -39,6 +40,10 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   error: null,
 
   registerToken: async (token, platform) => {
+    if (DEMO_MODE) {
+      set({ pushToken: token });
+      return { success: true };
+    }
     const { data, error } = await supabase.rpc("register_push_token", {
       p_token: token,
       p_platform: platform,
@@ -69,6 +74,10 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   },
 
   fetchNotifications: async () => {
+    if (DEMO_MODE) {
+      set({ notifications: [], unreadCount: 0, isLoading: false });
+      return;
+    }
     set({ isLoading: true });
 
     const { data, error } = await supabase
@@ -92,6 +101,10 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   },
 
   fetchUnreadCount: async () => {
+    if (DEMO_MODE) {
+      set({ unreadCount: 0 });
+      return;
+    }
     const { data, error } = await supabase.rpc(
       "get_unread_notification_count"
     );

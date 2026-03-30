@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
 import { supabase } from "../../lib/supabase";
 import { useRealtime } from "../../hooks/use-realtime";
+import { DEMO_MODE } from "../../lib/config";
+import { mockActivityFeed } from "../../lib/mock-data";
 
 interface FeedEvent {
   id: string;
@@ -18,6 +20,18 @@ export function FeedTab() {
 
   useEffect(() => {
     async function loadFeed() {
+      if (DEMO_MODE) {
+        setEvents(mockActivityFeed.map((e) => ({
+          id: e.id,
+          eventType: e.event_type,
+          actorUsername: e.actor_username,
+          crewName: e.crew_name,
+          zoneName: e.zone_name,
+          createdAt: e.created_at,
+        })));
+        setLoading(false);
+        return;
+      }
       const { data, error } = await supabase
         .from("activity_feed")
         .select(`

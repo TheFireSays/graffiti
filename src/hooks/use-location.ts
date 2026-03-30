@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import * as Location from "expo-location";
+import { DEMO_MODE, DEMO_LOCATION } from "../lib/config";
 
 interface UserLocation {
   latitude: number;
@@ -19,7 +19,19 @@ export function useLocation(): UseLocationResult {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let subscription: Location.LocationSubscription | null = null;
+    if (DEMO_MODE) {
+      setLocation({
+        latitude: DEMO_LOCATION.latitude,
+        longitude: DEMO_LOCATION.longitude,
+        heading: DEMO_LOCATION.heading,
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    // Dynamic import to avoid crashing on web
+    const Location = require("expo-location");
+    let subscription: any = null;
 
     async function startTracking() {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -45,7 +57,7 @@ export function useLocation(): UseLocationResult {
           distanceInterval: 10,
           timeInterval: 5000,
         },
-        (update) => {
+        (update: any) => {
           setLocation({
             latitude: update.coords.latitude,
             longitude: update.coords.longitude,

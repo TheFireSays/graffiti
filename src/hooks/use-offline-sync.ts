@@ -1,8 +1,8 @@
 import { useEffect, useRef, useCallback } from "react";
 import NetInfo from "@react-native-community/netinfo";
 import { useOfflineStore } from "../stores/offline-store";
-import { getQueue, updateStatus, removeFromQueue } from "../lib/offline-queue";
 import { placeTagDirect } from "../lib/tag-placement";
+import { DEMO_MODE } from "../lib/config";
 
 export function useOfflineSync() {
   const loadQueue = useOfflineStore((s) => s.loadQueue);
@@ -11,8 +11,11 @@ export function useOfflineSync() {
   const syncingRef = useRef(false);
 
   const syncPendingTags = useCallback(async () => {
+    if (DEMO_MODE) return;
+
+    const { getQueue, updateStatus, removeFromQueue } = require("../lib/offline-queue");
     const queue = await getQueue();
-    const pendingItems = queue.filter((q) => q.status === "queued");
+    const pendingItems = queue.filter((q: any) => q.status === "queued");
     if (pendingItems.length === 0) return;
 
     syncingRef.current = true;
@@ -41,6 +44,8 @@ export function useOfflineSync() {
   }, [setSyncing, setLastSyncMessage, loadQueue]);
 
   useEffect(() => {
+    if (DEMO_MODE) return;
+
     loadQueue();
 
     const unsubscribe = NetInfo.addEventListener(async (state) => {
