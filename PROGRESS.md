@@ -333,6 +333,19 @@
 
 ---
 
+## Crew Inactivity Dissolution (Complete)
+
+**Branch:** `feat/crew-membership`
+**Plan:** `/home/overlord/projects/docs/superpowers/plans/2026-03-30-crew-inactivity-dissolution.md`
+
+- [x] Task 1: Database migration (00040) — last_tagged_at, inactivity_warned_at columns, trigger, process_crew_inactivity() function, pg_cron job, backfill for existing crews
+- [x] Task 2: Crew store — added lastTaggedAt to CrewInfo interface and loadCrew
+- [x] Task 3: Inactivity warning banner — countdown in crew dashboard when inactive 25+ days, tap navigates to map
+- [x] Task 4: Full verification — 195 tests, 0 type errors, regenerated database types
+- [x] Pushed to `feat/crew-membership`
+
+---
+
 ## Notes / Errors
 
 - Task 3/Scaffolding (2026-03-29): Supabase CLI 2.84.4. Two non-critical services stopped (imgproxy, pooler).
