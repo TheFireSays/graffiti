@@ -20,15 +20,18 @@ export function MapDrawer({ userLatitude, userLongitude }: MapDrawerProps) {
 
   return (
     <View style={[styles.container, { height: expanded ? DRAWER_HEIGHT : 120 }]}>
-      <Pressable onPress={() => setExpanded(!expanded)} style={styles.handleArea}>
+      <Pressable onPress={() => setExpanded(!expanded)} style={styles.handleArea} accessibilityLabel={expanded ? "Collapse drawer" : "Expand drawer"} accessibilityRole="button">
         <View style={styles.handle} />
       </Pressable>
-      <View style={styles.tabs}>
+      <View style={styles.tabs} accessibilityRole="tablist">
         {TABS.map((tab) => (
           <Pressable
             key={tab}
             onPress={() => { setActiveTab(tab); if (!expanded) setExpanded(true); }}
             style={[styles.tab, activeTab === tab && styles.activeTab]}
+            accessibilityLabel={tab}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: activeTab === tab }}
           >
             <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>{tab}</Text>
           </Pressable>
