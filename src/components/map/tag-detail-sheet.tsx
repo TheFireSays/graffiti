@@ -2,6 +2,7 @@ import { useState } from "react";
 import { View, Text, Pressable, StyleSheet, Alert } from "react-native";
 import type { MapTag } from "../../lib/geo";
 import { supabase } from "../../lib/supabase";
+import { shareTag } from "../../lib/sharing";
 
 interface TagDetailSheetProps {
   tag: MapTag;
@@ -55,15 +56,30 @@ export function TagDetailSheet({ tag, onClose }: TagDetailSheetProps) {
         <DetailRow label="When" value={timeAgo} />
         <DetailRow label="Heading" value={`${Math.round(tag.compassHeading)}\u00B0`} />
       </View>
-      <Pressable
-        style={styles.reportButton}
-        onPress={handleReport}
-        disabled={reporting}
-      >
-        <Text style={styles.reportText}>
-          {reporting ? "Reporting..." : "Report Tag"}
-        </Text>
-      </Pressable>
+      <View style={styles.actionRow}>
+        <Pressable
+          style={styles.shareButton}
+          onPress={() =>
+            shareTag({
+              id: tag.id,
+              tagImageName: tag.tagImageName,
+              zoneName: null,
+              username: tag.username,
+            })
+          }
+        >
+          <Text style={styles.shareText}>Share</Text>
+        </Pressable>
+        <Pressable
+          style={styles.reportButton}
+          onPress={handleReport}
+          disabled={reporting}
+        >
+          <Text style={styles.reportText}>
+            {reporting ? "Reporting..." : "Report"}
+          </Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -111,8 +127,17 @@ const styles = StyleSheet.create({
   detailRow: { flexDirection: "row", justifyContent: "space-between" },
   detailLabel: { color: "#666", fontSize: 14 },
   detailValue: { color: "#fff", fontSize: 14 },
+  actionRow: { flexDirection: "row", gap: 8, marginTop: 16 },
+  shareButton: {
+    flex: 1,
+    backgroundColor: "#4ecdc4",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  shareText: { color: "#1a1a2e", fontSize: 14, fontWeight: "600" },
   reportButton: {
-    marginTop: 16,
+    flex: 1,
     backgroundColor: "#2a2a4a",
     borderRadius: 12,
     paddingVertical: 12,
