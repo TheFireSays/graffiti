@@ -43,11 +43,11 @@ export const mockCrew = {
 };
 
 export const mockCrewMembers = [
-  { userId: mockUser.id, username: "KRUSH", role: "og", joinedAt: "2026-03-01T00:00:00Z" },
-  { userId: "a1000000-0000-0000-0000-000000000002", username: "VENOM", role: "member", joinedAt: "2026-03-05T00:00:00Z" },
-  { userId: "a1000000-0000-0000-0000-000000000003", username: "BLAZE", role: "member", joinedAt: "2026-03-10T00:00:00Z" },
-  { userId: "a1000000-0000-0000-0000-000000000004", username: "NOVA", role: "member", joinedAt: "2026-03-12T00:00:00Z" },
-  { userId: "a1000000-0000-0000-0000-000000000006", username: "PHANTOM", role: "member", joinedAt: "2026-03-15T00:00:00Z" },
+  { userId: mockUser.id, username: "KRUSH", displayName: "Krush", role: "og", level: 12, xp: 2400, joinedAt: "2026-03-01T00:00:00Z" },
+  { userId: "a1000000-0000-0000-0000-000000000002", username: "VENOM", displayName: "Venom", role: "member", level: 8, xp: 1200, joinedAt: "2026-03-05T00:00:00Z" },
+  { userId: "a1000000-0000-0000-0000-000000000003", username: "BLAZE", displayName: "Blaze", role: "member", level: 15, xp: 3800, joinedAt: "2026-03-10T00:00:00Z" },
+  { userId: "a1000000-0000-0000-0000-000000000004", username: "NOVA", displayName: "Nova", role: "member", level: 6, xp: 800, joinedAt: "2026-03-12T00:00:00Z" },
+  { userId: "a1000000-0000-0000-0000-000000000006", username: "PHANTOM", displayName: "Phantom", role: "member", level: 5, xp: 600, joinedAt: "2026-03-15T00:00:00Z" },
 ];
 
 export const mockTags = [

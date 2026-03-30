@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 import type { Database } from "../lib/types/database";
+import { DEMO_MODE } from "../lib/config";
+import { mockUser, mockSession } from "../lib/mock-data";
 
 type AppUser = Database["public"]["Tables"]["users"]["Row"];
 
@@ -25,6 +27,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   needsOnboarding: false,
 
   setSession: (session) => {
+    if (DEMO_MODE) {
+      set({
+        session: mockSession as any,
+        user: mockSession.user as any,
+        profile: mockUser as unknown as AppUser,
+        isLoading: false,
+        needsOnboarding: false,
+      });
+      return;
+    }
     set({
       session,
       user: session?.user ?? null,
@@ -38,6 +50,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   fetchProfile: async () => {
+    if (DEMO_MODE) {
+      set({ profile: mockUser as unknown as AppUser, needsOnboarding: false });
+      return;
+    }
+
     const { user } = get();
     if (!user) return;
 
@@ -61,7 +78,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signOut: async () => {
-    await supabase.auth.signOut();
+    if (!DEMO_MODE) {
+      await supabase.auth.signOut();
+    }
     set({ session: null, user: null, profile: null, needsOnboarding: false });
   },
 }));

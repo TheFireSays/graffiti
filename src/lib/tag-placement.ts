@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { enqueue } from "./offline-queue";
+import { DEMO_MODE } from "./config";
 
 interface PlacementRequest {
   tagImageId: string;
@@ -31,6 +31,19 @@ function isNetworkError(error?: string): boolean {
 }
 
 export async function placeTagDirect(req: PlacementRequest): Promise<PlacementResult> {
+  if (DEMO_MODE) {
+    return {
+      success: true,
+      tagId: `demo-tag-${Date.now()}`,
+      xpEarned: 25,
+      sprayCost: 1,
+      sprayEarned: 0,
+      newXp: 2425,
+      newLevel: 12,
+      newSprayCans: 44,
+      leveledUp: false,
+    };
+  }
   const { data, error } = await supabase.rpc("place_tag_scored", {
     p_tag_image_id: req.tagImageId,
     p_custom_colors: req.customColors,
@@ -66,7 +79,9 @@ export async function placeTagDirect(req: PlacementRequest): Promise<PlacementRe
 export async function placeTag(req: PlacementRequest): Promise<PlacementResult> {
   const result = await placeTagDirect(req);
 
-  if (!result.success && isNetworkError(result.error)) {
+  if (!result.success && !DEMO_MODE && isNetworkError(result.error)) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { enqueue } = require("./offline-queue") as { enqueue: (req: PlacementRequest) => Promise<void> };
     await enqueue(req);
     return { success: false, error: "Tag queued for sync when online", queued: true };
   }

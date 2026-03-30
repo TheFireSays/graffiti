@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { supabase } from "../lib/supabase";
+import { DEMO_MODE } from "../lib/config";
+import { mockTagImages } from "../lib/mock-data";
 
 interface TagImageOption {
   id: string;
@@ -40,6 +42,23 @@ export const useTagStore = create<TagPlacementState>((set) => ({
   placementSuccess: false,
 
   loadTagLibrary: async (userLevel: number) => {
+    if (DEMO_MODE) {
+      set({
+        tagImages: mockTagImages.map((img) => ({
+          id: img.id,
+          name: img.name,
+          imageUrl: img.image_url ?? "",
+          category: "tag",
+          tier: 1,
+          customizableColors: [
+            { slot: "primary", default: img.preview_color },
+            { slot: "outline", default: "#000000" },
+          ],
+        })),
+        isLoadingLibrary: false,
+      });
+      return;
+    }
     set({ isLoadingLibrary: true });
     const { data, error } = await supabase
       .from("tag_images")
