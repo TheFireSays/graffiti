@@ -1,18 +1,29 @@
 import { useEffect, useState, useCallback } from "react";
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
-import { useLocation } from "../../hooks/use-location";
+import { View, Text, StyleSheet, ActivityIndicator, Platform } from "react-native";
 import { useAuthStore } from "../../stores/auth-store";
 import { useTagStore } from "../../stores/tag-store";
 import { useMapStore } from "../../stores/map-store";
 import { placeTag } from "../../lib/tag-placement";
-import { CameraViewWithHUD } from "../../components/camera/camera-view";
+import { DEMO_LOCATION } from "../../lib/config";
+
+// Conditional imports
+const useLocationHook = Platform.OS === "web"
+  ? () => ({ location: DEMO_LOCATION, error: null, isLoading: false })
+  : // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require("../../hooks/use-location").useLocation;
+
+const CameraComponent = Platform.OS === "web"
+  ? // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require("../../components/camera/camera-web-fallback").CameraWebFallback
+  : // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require("../../components/camera/camera-view").CameraViewWithHUD;
 import { TagLibrarySheet } from "../../components/camera/tag-library-sheet";
 import { ColorPicker } from "../../components/camera/color-picker";
 import { PlacementConfirmation } from "../../components/camera/placement-confirmation";
 import { PendingBadge } from "../../components/offline/pending-badge";
 
 export default function TagScreen() {
-  const { location, error: locationError, isLoading: locationLoading } = useLocation();
+  const { location, error: locationError, isLoading: locationLoading } = useLocationHook();
   const profile = useAuthStore((s) => s.profile);
 
   const selectedImage = useTagStore((s) => s.selectedImage);
@@ -91,7 +102,7 @@ export default function TagScreen() {
 
   return (
     <View style={styles.container}>
-      <CameraViewWithHUD
+      <CameraComponent
         latitude={location?.latitude ?? null}
         longitude={location?.longitude ?? null}
         heading={location?.heading ?? null}

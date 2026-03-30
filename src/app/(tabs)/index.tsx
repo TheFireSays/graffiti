@@ -1,16 +1,27 @@
 import { useEffect } from "react";
-import { View, StyleSheet, ActivityIndicator, Text } from "react-native";
-import { useLocation } from "../../hooks/use-location";
+import { View, StyleSheet, ActivityIndicator, Text, Platform } from "react-native";
 import { useMapStore } from "../../stores/map-store";
 import { useProfileStore } from "../../stores/profile-store";
-import { GraffitiMapView } from "../../components/map/map-view";
 import { TagDetailSheet } from "../../components/map/tag-detail-sheet";
 import { ZoneInfoSheet } from "../../components/map/zone-info-sheet";
 import { SeasonBanner } from "../../components/map/season-banner";
 import { MapDrawer } from "../../components/drawer/map-drawer";
+import { DEMO_MODE, DEMO_LOCATION } from "../../lib/config";
+
+// Conditional imports for platform compatibility
+const useLocationHook = Platform.OS === "web"
+  ? () => ({ location: DEMO_LOCATION, error: null, isLoading: false })
+  : // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require("../../hooks/use-location").useLocation;
+
+const MapComponent = Platform.OS === "web"
+  ? // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require("../../components/map/map-web-fallback").MapWebFallback
+  : // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require("../../components/map/map-view").GraffitiMapView;
 
 export default function MapScreen() {
-  const { location, error: locationError, isLoading: locationLoading } = useLocation();
+  const { location, error: locationError, isLoading: locationLoading } = useLocationHook();
   const loadMapData = useMapStore((s) => s.loadMapData);
   const isLoading = useMapStore((s) => s.isLoading);
   const selectedTag = useMapStore((s) => s.selectedTag);
@@ -49,7 +60,7 @@ export default function MapScreen() {
 
   return (
     <View style={styles.container}>
-      <GraffitiMapView
+      <MapComponent
         userLocation={
           location
             ? { latitude: location.latitude, longitude: location.longitude }
